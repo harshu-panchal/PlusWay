@@ -5,6 +5,8 @@ import {
     Zap, Home, Box
 } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isCatalogOpen, setIsCatalogOpen] = useState(false);
@@ -18,7 +20,7 @@ const Header = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/categories');
+                const response = await fetch(`${API_URL}/categories`);
                 if (response.ok) {
                     const data = await response.json();
                     setCategories(data);

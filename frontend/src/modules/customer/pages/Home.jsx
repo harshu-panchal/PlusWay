@@ -4,6 +4,8 @@ import HeroCarousel from '../components/HeroCarousel';
 import CategoryIcons from '../components/CategoryIcons';
 import ProductCard from '../components/ProductCard';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
 const Home = () => {
     const [sideBanner, setSideBanner] = useState(null);
     const [promoBanners, setPromoBanners] = useState([]);
@@ -12,14 +14,14 @@ const Home = () => {
         const fetchBanners = async () => {
             try {
                 // Fetch Side Banner
-                const sideRes = await fetch('http://localhost:5000/api/banners?position=side');
+                const sideRes = await fetch(`${API_URL}/banners?position=side`);
                 if (sideRes.ok) {
                     const data = await sideRes.json();
                     if (data.length > 0) setSideBanner(data[0]);
                 }
 
                 // Fetch Bottom Grid Banners
-                const gridRes = await fetch('http://localhost:5000/api/banners?position=bottom-grid');
+                const gridRes = await fetch(`${API_URL}/banners?position=bottom-grid`);
                 if (gridRes.ok) {
                     const data = await gridRes.json();
                     setPromoBanners(data);

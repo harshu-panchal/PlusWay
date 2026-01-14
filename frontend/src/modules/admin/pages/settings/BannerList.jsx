@@ -5,6 +5,8 @@ import Modal from '../../../../shared/components/ui/Modal';
 import Input from '../../../../shared/components/ui/Input';
 import { Plus, Edit, Trash, Image as ImageIcon } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
 const BannerList = () => {
     const [banners, setBanners] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,7 +15,7 @@ const BannerList = () => {
 
     const fetchBanners = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/banners/admin');
+            const response = await fetch(`${API_URL}/banners/admin`);
             if (response.ok) {
                 setBanners(await response.json());
             }
@@ -31,7 +33,7 @@ const BannerList = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this banner?')) return;
         try {
-            await fetch(`http://localhost:5000/api/banners/${id}`, { method: 'DELETE' });
+            await fetch(`${API_URL}/banners/${id}`, { method: 'DELETE' });
             fetchBanners();
         } catch (error) {
             console.error(error);
@@ -118,7 +120,7 @@ const BannerForm = ({ banner, onSave, onCancel }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const url = banner ? `http://localhost:5000/api/banners/${banner._id}` : 'http://localhost:5000/api/banners';
+        const url = banner ? `${API_URL}/banners/${banner._id}` : `${API_URL}/banners`;
         const method = banner ? 'PUT' : 'POST';
 
         await fetch(url, {

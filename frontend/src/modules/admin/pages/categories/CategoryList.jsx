@@ -5,6 +5,8 @@ import Modal from '../../../../shared/components/ui/Modal';
 import CategoryForm from './CategoryForm';
 import { Plus, Edit, Trash, FolderTree } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
 const CategoryList = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,7 +16,7 @@ const CategoryList = () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/categories');
+            const response = await fetch(`${API_URL}/categories`);
             if (response.ok) {
                 const data = await response.json();
 
@@ -55,7 +57,7 @@ const CategoryList = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this category?')) return;
         try {
-            const response = await fetch(`http://localhost:5000/api/categories/${id}`, {
+            const response = await fetch(`${API_URL}/categories/${id}`, {
                 method: 'DELETE'
             });
             if (response.ok) {
@@ -69,8 +71,8 @@ const CategoryList = () => {
     const handleSave = async (formData) => {
         try {
             const url = editingCategory
-                ? `http://localhost:5000/api/categories/${editingCategory._id}`
-                : 'http://localhost:5000/api/categories';
+                ? `${API_URL}/categories/${editingCategory._id}`
+                : `${API_URL}/categories`;
 
             const method = editingCategory ? 'PUT' : 'POST';
 

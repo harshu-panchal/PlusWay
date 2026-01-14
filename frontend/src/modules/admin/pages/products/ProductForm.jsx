@@ -5,6 +5,8 @@ import Input from '../../../../shared/components/ui/Input';
 import Button from '../../../../shared/components/ui/Button';
 import { Plus, Trash, Save, ArrowLeft, Layers, X } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
 const ProductForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
@@ -41,7 +43,7 @@ const ProductForm = () => {
             try {
                 // Mock fetch or verify actual service usage
                 // assuming existing logic was fetching from API
-                const response = await fetch('http://localhost:5000/api/categories');
+                const response = await fetch(`${API_URL}/categories`);
                 const data = await response.json();
                 setCategories(data);
             } catch (error) {
@@ -110,7 +112,7 @@ const ProductForm = () => {
 
         try {
             setUploading(true);
-            const response = await fetch('http://localhost:5000/api/upload', {
+            const response = await fetch(`${API_URL}/upload`, {
                 method: 'POST',
                 body: formData
             });
@@ -204,8 +206,8 @@ const ProductForm = () => {
         setLoading(true);
         try {
             const url = isEditMode
-                ? `http://localhost:5000/api/products/${id}`
-                : 'http://localhost:5000/api/products';
+                ? `${API_URL}/products/${id}`
+                : `${API_URL}/products`;
 
             const method = isEditMode ? 'PUT' : 'POST';
 

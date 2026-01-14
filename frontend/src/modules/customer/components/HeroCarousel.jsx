@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
 const HeroCarousel = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -11,7 +13,7 @@ const HeroCarousel = () => {
     useEffect(() => {
         const fetchBanners = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/banners?position=hero');
+                const response = await fetch(`${API_URL}/banners?position=hero`);
                 if (response.ok) {
                     setBanners(await response.json());
                 }
