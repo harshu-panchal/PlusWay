@@ -2,16 +2,20 @@ import { useState, useEffect } from 'react';
 import Card from '../../../../shared/components/ui/Card';
 import Input from '../../../../shared/components/ui/Input';
 import Button from '../../../../shared/components/ui/Button';
-import { Save, X, Plus } from 'lucide-react';
+import { Save, X, Plus, Upload, ImageIcon, Trash2 } from 'lucide-react';
 
-const CategoryForm = ({ category, categories, onSave, onCancel }) => {
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
+const CategoryForm = ({ category, categories, onSave, onCancel, defaultParent = '' }) => {
     const [formData, setFormData] = useState({
         name: '',
         parent: '',
         level: 0,
-        filterableAttributes: []
+        filterableAttributes: [],
+        icon: ''
     });
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [newAttribute, setNewAttribute] = useState('');
 
     useEffect(() => {
@@ -20,10 +24,50 @@ const CategoryForm = ({ category, categories, onSave, onCancel }) => {
                 name: category.name,
                 parent: category.parent || '',
                 level: category.level,
-                filterableAttributes: category.filterableAttributes || []
+                filterableAttributes: category.filterableAttributes || [],
+                icon: category.icon || ''
             });
+        } else if (defaultParent) {
+            // Pre-select parent if creating a subcategory
+            setFormData(prev => ({ ...prev, parent: defaultParent }));
         }
-    }, [category]);
+    }, [category, defaultParent]);
+
+    // Handle icon upload
+    const handleIconUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const uploadFormData = new FormData();
+        uploadFormData.append('image', file);
+
+        try {
+            setUploading(true);
+            const response = await fetch(`${API_URL}/upload`, {
+                method: 'POST',
+                body: uploadFormData
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setFormData(prev => ({ ...prev, icon: data.url }));
+            } else {
+                alert('Upload failed: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Upload Error:', error);
+            alert('Upload failed');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    // Remove icon
+    const handleRemoveIcon = () => {
+        setFormData(prev => ({ ...prev, icon: '' }));
+    };
+
+    // Check if this is a header category (no parent)
+    const isHeaderCategory = !formData.parent;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -58,7 +102,14 @@ const CategoryForm = ({ category, categories, onSave, onCancel }) => {
             if (parentCat) level = parentCat.level + 1;
         }
 
-        await onSave({ ...formData, level });
+        // Convert empty string parent to null for backend validation
+        const submissionData = {
+            ...formData,
+            parent: formData.parent || null,
+            level
+        };
+
+        await onSave(submissionData);
         setLoading(false);
     };
 
@@ -90,6 +141,77 @@ const CategoryForm = ({ category, categories, onSave, onCancel }) => {
                         ))}
                 </select>
             </div>
+
+            {/* Icon Upload - Only for Header Categories */}
+            {isHeaderCategory && (
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">Category Icon (Optional)</label>
+                    <p className="text-xs text-gray-400">Upload an icon to display on the homepage category grid. Recommended size: 80x80 pixels.</p>
+
+                    <div className="flex items-start gap-4">
+                        {/* Icon Preview */}
+                        {formData.icon ? (
+                            <div className="relative group">
+                                <div className="w-20 h-20 rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-50">
+                                    <img
+                                        src={formData.icon}
+                                        alt="Category icon"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleRemoveIcon}
+                                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Remove icon"
+                                >
+                                    <X className="w-3 h-3" />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
+                                <ImageIcon className="w-8 h-8 text-gray-300" />
+                            </div>
+                        )}
+
+                        {/* Upload Button */}
+                        <div className="flex flex-col gap-2">
+                            <label className="cursor-pointer">
+                                <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={handleIconUpload}
+                                    className="hidden"
+                                    disabled={uploading}
+                                />
+                                <div className={`inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium transition-colors ${uploading ? 'bg-gray-100 text-gray-400' : 'bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400'}`}>
+                                    {uploading ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                                            Uploading...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload className="w-4 h-4" />
+                                            {formData.icon ? 'Change Icon' : 'Upload Icon'}
+                                        </>
+                                    )}
+                                </div>
+                            </label>
+                            {formData.icon && (
+                                <button
+                                    type="button"
+                                    onClick={handleRemoveIcon}
+                                    className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
+                                >
+                                    <Trash2 className="w-3 h-3" />
+                                    Remove
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">Filterable Attributes</label>

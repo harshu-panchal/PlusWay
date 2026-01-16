@@ -5,15 +5,14 @@ import { Provider } from 'react-redux';
 import App from './App.jsx';
 import './index.css';
 
-// Note: Store will be imported once Redux is configured
-// import store from './store';
+import store from './store';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      {/* <Provider store={store}> */}
-      <App />
-      {/* </Provider> */}
+      <Provider store={store}>
+        <App />
+      </Provider>
     </BrowserRouter>
   </StrictMode>
 );

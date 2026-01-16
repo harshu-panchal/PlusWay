@@ -1,8 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import DeliveryLayout from '../layouts/DeliveryLayout';
+import ProtectedRoute from '../../../shared/components/ProtectedRoute';
 
 // Auth Pages
 import Login from '../pages/auth/Login';
+import Signup from '../pages/auth/Signup';
 
 // Protected Pages
 import Dashboard from '../pages/Dashboard';
@@ -15,13 +17,16 @@ const DeliveryRoutes = () => {
         <Routes>
             {/* Auth Routes */}
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
             {/* Protected Routes with Layout */}
-            <Route element={<DeliveryLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/orders" element={<DeliveryList />} />
-                <Route path="/orders/:id" element={<DeliveryDetail />} />
-                <Route path="/profile" element={<Profile />} />
+            <Route element={<ProtectedRoute allowedRoles={['delivery']} redirectPath="/delivery/login" />}>
+                <Route element={<DeliveryLayout />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/orders" element={<DeliveryList />} />
+                    <Route path="/orders/:id" element={<DeliveryDetail />} />
+                    <Route path="/profile" element={<Profile />} />
+                </Route>
             </Route>
 
             {/* Redirect /delivery to /delivery/dashboard */}

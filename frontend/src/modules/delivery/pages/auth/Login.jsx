@@ -1,66 +1,92 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Input from '../../../../shared/components/ui/Input';
-import Button from '../../../../shared/components/ui/Button';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, Link } from 'react-router-dom';
+import { login } from '../../../../store/authSlice';
 import Card from '../../../../shared/components/ui/Card';
+import Button from '../../../../shared/components/ui/Button';
+import Input from '../../../../shared/components/ui/Input';
 
 const Login = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
+    const { isLoading } = useSelector((state) => state.auth);
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: Implement delivery login logic
-        console.log('Delivery Login:', formData);
-        navigate('/delivery/dashboard');
+        setError('');
+
+        const resultAction = await dispatch(login({ email, password }));
+        if (login.fulfilled.match(resultAction)) {
+            const user = resultAction.payload.user;
+            if (user.role === 'delivery') {
+                navigate('/delivery/dashboard');
+            } else {
+                setError('Access denied. This portal is for delivery boys only.');
+                // We should probably logout here if we want to be strict
+            }
+        } else {
+            setError(resultAction.payload || 'Invalid credentials');
+        }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 py-12 px-4">
-            <Card className="w-full max-w-md">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+            <Card className="w-full max-w-md p-8 shadow-xl">
                 <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                        <span className="text-white font-bold text-2xl">D</span>
-                    </div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Delivery Login</h1>
-                    <p className="text-gray-600">Sign in to access delivery panel</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Delivery Boy Login</h1>
+                    <p className="text-gray-500 mt-2">Enter your credentials to access the delivery portal</p>
                 </div>
 
+                {error && (
+                    <div className="mb-6 p-3 bg-red-100 text-red-700 rounded-lg text-sm text-center font-medium">
+                        {error}
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <Input
-                        label="Email"
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="Enter your email"
-                        required
-                    />
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700">Email Address</label>
+                        <Input
+                            type="email"
+                            placeholder="delivery@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                    <Input
-                        label="Password"
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="Enter password"
-                        required
-                    />
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700">Password</label>
+                        <Input
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                    <Button type="submit" className="w-full" size="lg">
-                        Sign In
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        className="w-full py-3 text-lg"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Logging in...' : 'Sign In'}
                     </Button>
                 </form>
+
+                <div className="mt-8 text-center">
+                    <p className="text-gray-600">
+                        Don't have an account?{' '}
+                        <Link to="/delivery/signup" className="text-primary font-bold hover:underline">
+                            Sign up now
+                        </Link>
+                    </p>
+                </div>
             </Card>
         </div>
     );

@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import Card from '../../../../shared/components/ui/Card';
 import Button from '../../../../shared/components/ui/Button';
 import Modal from '../../../../shared/components/ui/Modal';
+import Badge from '../../../../shared/components/ui/Badge';
 import CategoryForm from './CategoryForm';
-import { Plus, Edit, Trash, FolderTree } from 'lucide-react';
+import { Plus, Edit, Trash, FolderTree, FolderPlus, ChevronRight, ChevronDown, Search, MoreVertical } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -12,6 +13,7 @@ const CategoryList = () => {
     const [loading, setLoading] = useState(true);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
+    const [defaultParentForNew, setDefaultParentForNew] = useState('');
     const [expanded, setExpanded] = useState({});
 
     const fetchCategories = async () => {
@@ -24,7 +26,7 @@ const CategoryList = () => {
                 const buildCategoryTree = (categories, parentId = null, level = 0) => {
                     return categories
                         .filter(cat => (cat.parent || null) === parentId)
-                        .sort((a, b) => a.name.localeCompare(b.name)) // Optional: sort by name
+                        .sort((a, b) => a.name.localeCompare(b.name))
                         .reduce((acc, cat) => {
                             return [...acc, { ...cat, level }, ...buildCategoryTree(categories, cat._id, level + 1)];
                         }, []);
@@ -46,6 +48,13 @@ const CategoryList = () => {
 
     const handleAdd = () => {
         setEditingCategory(null);
+        setDefaultParentForNew('');
+        setIsFormOpen(true);
+    };
+
+    const handleAddSubCategory = (parentId) => {
+        setEditingCategory(null);
+        setDefaultParentForNew(parentId);
         setIsFormOpen(true);
     };
 
@@ -85,9 +94,13 @@ const CategoryList = () => {
             if (response.ok) {
                 setIsFormOpen(false);
                 fetchCategories();
+            } else {
+                const data = await response.json();
+                alert(data.error || 'Failed to save category');
             }
         } catch (error) {
             console.error('Failed to save category', error);
+            alert('An unexpected error occurred');
         }
     };
 
@@ -117,76 +130,150 @@ const CategoryList = () => {
     });
 
     return (
-        <div className="flex gap-6 items-start">
-            <div className="flex-1">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold text-gray-800">Categories</h1>
-                    <Button onClick={handleAdd} icon={Plus}>
-                        Add Category
-                    </Button>
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-800">Categories</h1>
+                    <p className="text-slate-500 text-sm">Organize your products into a nested hierarchy.</p>
+                </div>
+                <Button onClick={handleAdd} icon={Plus} size="sm">
+                    Add Category
+                </Button>
+            </div>
+
+            <Card padding={false} className="overflow-hidden border-slate-200 shadow-sm">
+                <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+                    <div className="relative max-w-md">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input
+                            type="text"
+                            placeholder="Search categories..."
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 outline-none transition-all"
+                        />
+                    </div>
                 </div>
 
-                <Card>
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-gray-100 bg-gray-50/50">
-                                    <th className="text-left py-4 px-4 font-semibold text-gray-600">Name (Hierarchy)</th>
-                                    <th className="text-left py-4 px-4 font-semibold text-gray-600">Slug</th>
-                                    <th className="text-right py-4 px-4 font-semibold text-gray-600">Actions</th>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50/50 border-b border-slate-100">
+                                <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Hierarchy & Name</th>
+                                <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Slug</th>
+                                <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                <th className="py-4 px-6 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {loading ? (
+                                Array(5).fill(0).map((_, i) => (
+                                    <tr key={i} className="animate-pulse">
+                                        <td colSpan="4" className="py-6 px-6">
+                                            <div className="h-8 bg-slate-100 rounded-lg w-full"></div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : visibleCategories.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="py-20 text-center">
+                                        <div className="flex flex-col items-center justify-center text-slate-400">
+                                            <FolderTree className="w-12 h-12 mb-4 opacity-20" />
+                                            <p className="font-medium">No categories found</p>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {loading ? (
-                                    <tr><td colSpan="3" className="text-center py-10">Loading...</td></tr>
-                                ) : visibleCategories.map((category) => (
-                                    <tr key={category._id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                                        <td className="py-3 px-4">
-                                            <div style={{ paddingLeft: `${category.level * 24}px` }} className="flex items-center">
+                            ) : (
+                                visibleCategories.map((category) => (
+                                    <tr key={category._id} className="hover:bg-slate-50 transition-colors group">
+                                        <td className="py-4 px-6">
+                                            <div
+                                                style={{ paddingLeft: `${category.level * 2}rem` }}
+                                                className="flex items-center gap-3"
+                                            >
                                                 {/* Toggle Button */}
-                                                {hasChildren(category._id) ? (
-                                                    <button
-                                                        onClick={() => toggleExpand(category._id)}
-                                                        className="mr-2 p-1 hover:bg-gray-200 rounded transition-colors text-gray-500"
-                                                    >
-                                                        <span className="inline-block w-4 h-4 text-xs">
-                                                            {expanded[category._id] ? '▼' : '▶'}
-                                                        </span>
-                                                    </button>
-                                                ) : (
-                                                    <span className="w-6 mr-2"></span> // Spacer
-                                                )}
+                                                <div className="w-6 flex items-center justify-center">
+                                                    {hasChildren(category._id) ? (
+                                                        <button
+                                                            onClick={() => toggleExpand(category._id)}
+                                                            className="p-1 hover:bg-slate-200 rounded-lg transition-colors text-slate-400"
+                                                        >
+                                                            {expanded[category._id] ? (
+                                                                <ChevronDown className="w-4 h-4" />
+                                                            ) : (
+                                                                <ChevronRight className="w-4 h-4" />
+                                                            )}
+                                                        </button>
+                                                    ) : (
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div>
+                                                    )}
+                                                </div>
 
-                                                <FolderTree className={`w-4 h-4 mr-2 ${category.level === 0 ? 'text-teal-600' : 'text-gray-400'}`} />
-                                                <span className={`font-medium ${category.level === 0 ? 'text-gray-900 group-hover:text-teal-600' : 'text-gray-600'}`}>
+                                                <div className={`p-2 rounded-lg ${category.level === 0 ? 'bg-primary-50 text-primary-600' : 'bg-slate-100 text-slate-400'} overflow-hidden`}>
+                                                    {category.icon && category.level === 0 ? (
+                                                        <img
+                                                            src={category.icon}
+                                                            alt={category.name}
+                                                            className="w-4 h-4 object-cover rounded"
+                                                        />
+                                                    ) : (
+                                                        <FolderTree className="w-4 h-4" />
+                                                    )}
+                                                </div>
+
+                                                <span className={`font-bold transition-colors ${category.level === 0 ? 'text-slate-800' : 'text-slate-600 text-sm'
+                                                    } group-hover:text-primary-600`}>
                                                     {category.name}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="py-3 px-4 text-gray-500 text-sm">{category.slug || '-'}</td>
-                                        <td className="py-3 px-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    onClick={() => handleEdit(category)}
-                                                    className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(category._id)}
-                                                    className="p-1 text-red-600 hover:bg-red-50 rounded"
-                                                >
-                                                    <Trash className="w-4 h-4" />
-                                                </button>
+                                        <td className="py-4 px-6">
+                                            <code className="text-[11px] bg-slate-100 text-slate-500 px-2 py-1 rounded-md font-mono">
+                                                {category.slug || '-'}
+                                            </code>
+                                        </td>
+                                        <td className="py-4 px-6">
+                                            <Badge variant="success" size="sm">Active</Badge>
+                                        </td>
+                                        <td className="py-4 px-6 text-right">
+                                            <div className="relative flex justify-end items-center min-h-[32px]">
+                                                {/* Default Actions (Visible when not hovered) */}
+                                                <div className="group-hover:opacity-0 transition-opacity duration-200 flex items-center">
+                                                    <MoreVertical className="w-4 h-4 text-slate-400" />
+                                                </div>
+
+                                                {/* Hover Actions (Visible on hover) */}
+                                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-end gap-1 pointer-events-none group-hover:pointer-events-auto p-1">
+                                                    <button
+                                                        onClick={() => handleAddSubCategory(category._id)}
+                                                        className="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-all"
+                                                        title="Add Subcategory"
+                                                    >
+                                                        <FolderPlus className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleEdit(category)}
+                                                        className="p-1.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
+                                                        title="Edit"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(category._id)}
+                                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                        title="Delete"
+                                                    >
+                                                        <Trash className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </td>
+
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </Card>
-            </div>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
 
             {/* Modal Form */}
             <Modal
@@ -197,6 +284,7 @@ const CategoryList = () => {
                 <CategoryForm
                     category={editingCategory}
                     categories={categories}
+                    defaultParent={defaultParentForNew}
                     onSave={handleSave}
                     onCancel={() => setIsFormOpen(false)}
                 />
@@ -206,3 +294,4 @@ const CategoryList = () => {
 };
 
 export default CategoryList;
+

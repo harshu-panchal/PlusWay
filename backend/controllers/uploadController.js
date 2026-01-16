@@ -14,7 +14,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'appzeto_products',
+        folder: 'plusway_products',
         allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
     },
 });

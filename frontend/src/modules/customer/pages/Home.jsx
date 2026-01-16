@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 import HeroCarousel from '../components/HeroCarousel';
 import CategoryIcons from '../components/CategoryIcons';
 import ProductCard from '../components/ProductCard';
+import BrandMarquee from '../components/BrandMarquee';
+import DealOfTheDay from '../components/DealOfTheDay';
+import ProductRow from '../components/ProductRow';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -10,70 +13,94 @@ const Home = () => {
     const [sideBanner, setSideBanner] = useState(null);
     const [promoBanners, setPromoBanners] = useState([]);
 
+    // Data States
+    const [bestSellers, setBestSellers] = useState({ data: [], loading: true });
+    const [newArrivals, setNewArrivals] = useState({ data: [], loading: true });
+
     useEffect(() => {
-        const fetchBanners = async () => {
+        const fetchData = async () => {
             try {
-                // Fetch Side Banner
+                // Fetch Banners
                 const sideRes = await fetch(`${API_URL}/banners?position=side`);
                 if (sideRes.ok) {
                     const data = await sideRes.json();
                     if (data.length > 0) setSideBanner(data[0]);
                 }
 
-                // Fetch Bottom Grid Banners
                 const gridRes = await fetch(`${API_URL}/banners?position=bottom-grid`);
                 if (gridRes.ok) {
                     const data = await gridRes.json();
                     setPromoBanners(data);
                 }
+
+                // Fetch Featured Products (Manually Selected)
+                const prodRes = await fetch(`${API_URL}/products?limit=8&isFeatured=true`);
+                if (prodRes.ok) {
+                    const data = await prodRes.json();
+                    setBestSellers({ data: data.products || [], loading: false });
+                }
+
+                // Fetch New Arrivals (Manually Selected)
+                const newRes = await fetch(`${API_URL}/products?limit=8&isNewArrival=true&sort=newest`);
+                if (newRes.ok) {
+                    const data = await newRes.json();
+                    setNewArrivals({ data: data.products || [], loading: false });
+                }
+
             } catch (error) {
                 console.error(error);
+                setBestSellers({ data: [], loading: false });
+                setNewArrivals({ data: [], loading: false });
             }
         };
-        fetchBanners();
+        fetchData();
     }, []);
 
+    const FeatureItem = ({ icon, title, desc }) => (
+        <div className="flex items-center gap-4 p-4 rounded-xl border border-transparent hover:border-gray-100 hover:bg-white hover:shadow-sm transition-all duration-300">
+            <div className="text-4xl">{icon}</div>
+            <div>
+                <h3 className="font-bold text-slate-900 uppercase tracking-wide text-xs mb-0.5">{title}</h3>
+                <p className="text-slate-500 text-xs">{desc}</p>
+            </div>
+        </div>
+    );
+
     return (
-        <div className="bg-gray-50">
-            {/* Hero Carousel Section */}
-            <section className="mx-4 lg:mx-[10%] pt-6 pb-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Main Carousel - 75% width on desktop */}
-                    <div className="lg:col-span-8 xl:col-span-9">
-                        <HeroCarousel />
-                    </div>
+        <div className="bg-gray-50 min-h-screen">
+            {/* 1. Hero Carousel Section */}
+            <section className="pt-6 pb-2">
+                <div className="mx-4 lg:mx-[10%]">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {/* Main Carousel - 75% width on desktop */}
+                        <div className="lg:col-span-8 xl:col-span-9">
+                            <HeroCarousel />
+                        </div>
 
-                    {/* Side Banner - 25% width on desktop */}
-                    <div className="lg:col-span-4 xl:col-span-3 hidden lg:block">
-                        <div className="relative w-full h-full rounded-xl overflow-hidden shadow-lg group cursor-pointer">
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-800 to-indigo-900">
-                                {/* Background Image */}
-                                <img
-                                    src={sideBanner?.image || "https://images.unsplash.com/photo-1616410011236-7a4211f90103?w=800&h=600&fit=crop"}
-                                    alt={sideBanner?.title || "AppZeto Premium"}
-                                    className="w-full h-full object-cover mix-blend-overlay opacity-40 group-hover:scale-105 transition-transform duration-700"
-                                />
+                        {/* Side Banner - 25% width on desktop */}
+                        <div className="lg:col-span-4 xl:col-span-3 hidden lg:block">
+                            <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-sm group cursor-pointer border border-gray-100">
+                                <div className="absolute inset-0 bg-slate-900">
+                                    {/* Background Image */}
+                                    <img
+                                        src={sideBanner?.image || "https://images.unsplash.com/photo-1616410011236-7a4211f90103?w=800&h=600&fit=crop"}
+                                        alt={sideBanner?.title || "PlusWay Premium"}
+                                        className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                                    />
 
-                                {/* Content */}
-                                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-white">
-                                    <div className="mb-4">
-                                        <h2 className="text-4xl font-bold tracking-tight mb-1">{sideBanner?.title || 'AppZeto'}</h2>
-                                        <span className="text-xs uppercase tracking-[0.3em] opacity-80">{sideBanner?.subtitle || 'Original'}</span>
-                                    </div>
-
-                                    {!sideBanner && (
-                                        <div className="relative w-48 h-48 my-4">
-                                            <img
-                                                src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=contain"
-                                                alt="Headphones"
-                                                className="w-full h-full object-contain drop-shadow-2xl animate-fade-in-up"
-                                            />
+                                    {/* Content Overlay */}
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-white z-10">
+                                        <div className="mb-4">
+                                            <h2 className="text-3xl font-bold tracking-tight mb-2 leading-tight">{sideBanner?.title || 'Premium\nAudio'}</h2>
+                                            <div className="h-1 w-12 bg-teal-500 rounded-full mx-auto"></div>
                                         </div>
-                                    )}
 
-                                    <Link to={sideBanner?.link || '/products'} className="mt-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white px-6 py-2 rounded-full font-medium hover:bg-white hover:text-purple-900 transition-all duration-300">
-                                        View Collection
-                                    </Link>
+                                        <p className="text-sm text-slate-200 mb-6 max-w-[80%] leading-relaxed">{sideBanner?.subtitle || 'Experience sound like never before.'}</p>
+
+                                        <Link to={sideBanner?.link || '/products'} className="px-6 py-2.5 bg-white text-slate-900 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-teal-500 hover:text-white transition-all duration-300 shadow-lg">
+                                            Shop Now
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -81,61 +108,129 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Category Icons Section */}
-            <section className="bg-white pt-10 pb-12 border-b border-gray-100">
+            {/* 2. Features Strip (Trust Signals) - Moved UP */}
+            <section className="py-6">
                 <div className="mx-4 lg:mx-[10%]">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FeatureItem icon="🚚" title="Free Shipping" desc="On all orders over ₹499" />
+                        <FeatureItem icon="🛡️" title="Secure Payment" desc="100% protected transactions" />
+                        <FeatureItem icon="↩️" title="Easy Returns" desc="30-day money back guarantee" />
+                    </div>
+                </div>
+            </section>
+
+            {/* 3. Category Icons (Clean Row) */}
+            <section className="relative py-8 mb-6 overflow-hidden">
+                {/* Dynamic Mesh Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-50 opacity-80"></div>
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute -top-[20%] -left-[10%] w-[40rem] h-[40rem] bg-teal-400/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+                    <div className="absolute top-[20%] -right-[10%] w-[35rem] h-[35rem] bg-purple-400/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+                    <div className="absolute -bottom-[20%] left-[20%] w-[45rem] h-[45rem] bg-blue-400/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+                </div>
+
+                <style>{`
+                    @keyframes blob {
+                        0% { transform: translate(0px, 0px) scale(1); }
+                        33% { transform: translate(30px, -50px) scale(1.1); }
+                        66% { transform: translate(-20px, 20px) scale(0.9); }
+                        100% { transform: translate(0px, 0px) scale(1); }
+                    }
+                    .animate-blob {
+                        animation: blob 7s infinite;
+                    }
+                    .animation-delay-2000 {
+                        animation-delay: 2s;
+                    }
+                    .animation-delay-4000 {
+                        animation-delay: 4s;
+                    }
+                `}</style>
+
+                <div className="relative mx-4 lg:mx-[10%] z-10">
+                    <div className="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Popular Categories</h2>
+                            <div className="h-1 w-12 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full mt-1"></div>
+                        </div>
+                        <Link to="/products" className="group flex items-center gap-1 text-sm font-bold text-teal-600 hover:text-teal-700 transition-colors bg-white/50 px-4 py-2 rounded-full backdrop-blur-sm border border-white/50 shadow-sm hover:shadow-md">
+                            View All
+                            <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                        </Link>
+                    </div>
                     <CategoryIcons />
                 </div>
             </section>
 
-            {/* Featured Products Section */}
-            <section className="py-16 bg-gray-50/50">
+            {/* 4. New Arrivals (Horizontal Scroll) */}
+            <ProductRow
+                title="New Arrivals"
+                products={newArrivals.data}
+                loading={newArrivals.loading}
+                link="/products?isNewArrival=true&sort=newest"
+            />
+
+            {/* 5. Deal of the Day (Promotional Block) */}
+            <DealOfTheDay />
+
+            {/* 6. Shop by Brands (Marquee) */}
+            <BrandMarquee />
+
+            {/* 7. Featured Products (Grid) */}
+            <section className="py-16 bg-gray-50">
                 <div className="mx-4 lg:mx-[10%]">
                     <div className="flex items-end justify-between mb-10">
                         <div>
-                            <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Best Sellers</h2>
+                            <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Featured Products</h2>
                             <div className="h-1 w-20 bg-teal-500 rounded-full"></div>
                         </div>
-                        <button className="hidden md:flex items-center text-teal-600 hover:text-teal-700 font-semibold transition-colors group">
-                            View Collection
+                        <Link to="/products?isFeatured=true" className="hidden md:flex items-center text-teal-600 hover:text-teal-700 font-semibold transition-colors group">
+                            See All Products
                             <span className="group-hover:translate-x-1 transition-transform ml-1">→</span>
-                        </button>
+                        </Link>
                     </div>
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-                            <ProductCard key={item} id={item} />
-                        ))}
+                        {bestSellers.loading ? (
+                            [1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                                <div key={i} className="bg-white rounded-2xl h-[400px] animate-pulse"></div>
+                            ))
+                        ) : bestSellers.data.length > 0 ? (
+                            bestSellers.data.map((product) => (
+                                <ProductCard key={product._id} product={product} />
+                            ))
+                        ) : (
+                            <div className="col-span-full text-center text-gray-500 py-10">
+                                Check back soon for featured items!
+                            </div>
+                        )}
                     </div>
 
-                    <button className="md:hidden w-full mt-8 bg-white border border-gray-200 text-slate-700 py-3 rounded-xl font-medium">
-                        View All Products
-                    </button>
+                    <Link to="/products?isFeatured=true" className="md:hidden w-full mt-8 flex items-center justify-center bg-white border border-gray-200 text-slate-700 py-3 rounded-xl font-medium">
+                        View More
+                    </Link>
                 </div>
             </section>
 
-            {/* Promotional Banner Section */}
+            {/* 8. Promotional Banners (Grid) */}
             {promoBanners.length > 0 && (
                 <section className="py-16 bg-white">
                     <div className="mx-4 lg:mx-[10%]">
                         <div className="grid md:grid-cols-2 gap-8">
                             {promoBanners.slice(0, 2).map((banner) => (
-                                <Link to={banner.link} key={banner._id} className="relative h-[300px] rounded-2xl overflow-hidden group cursor-pointer isolate">
-                                    <div className="absolute inset-0 bg-gray-900">
+                                <Link to={banner.link} key={banner._id} className="relative h-[280px] rounded-3xl overflow-hidden group cursor-pointer isolate shadow-md hover:shadow-xl transition-shadow duration-300">
+                                    <div className="absolute inset-0">
                                         <img
                                             src={banner.image}
                                             alt={banner.title}
-                                            className="w-full h-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                         />
+                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
                                     </div>
-                                    <div className="relative h-full flex flex-col justify-center px-10 text-white">
-                                        <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-bold uppercase tracking-wider rounded-full w-fit mb-4">
-                                            {banner.isActive ? 'Featured' : 'Promo'}
-                                        </span>
-                                        <h3 className="text-4xl font-bold mb-2 tracking-tight">{banner.title}</h3>
-                                        <p className="text-gray-200 mb-8 max-w-md text-lg">{banner.subtitle}</p>
-                                        <span className="text-white font-bold tracking-wide border-b-2 border-white pb-1 w-fit hover:border-teal-400 hover:text-teal-400 transition-colors">
-                                            SHOP NOW
+                                    <div className="absolute bottom-8 left-8 right-8">
+                                        <h3 className="text-2xl font-bold text-white mb-4 drop-shadow-md">{banner.title}</h3>
+                                        <span className="inline-flex items-center justify-center bg-white text-slate-900 px-6 py-2 rounded-full font-bold text-xs tracking-wider uppercase hover:bg-teal-500 hover:text-white transition-colors duration-300">
+                                            Shop Now
                                         </span>
                                     </div>
                                 </Link>
@@ -145,54 +240,29 @@ const Home = () => {
                 </section>
             )}
 
-            {/* Newsletter Section */}
-            <section className="py-20 bg-slate-900 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-slate-800 to-transparent"></div>
-                <div className="mx-4 lg:mx-[10%] relative z-10">
-                    <div className="max-w-2xl mx-auto text-center">
-                        <h2 className="text-3xl font-bold text-white mb-4">Join the AppZeto Family</h2>
-                        <p className="text-slate-400 mb-8 text-lg">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
+            {/* 9. Newsletter Section */}
+            <section className="py-20 bg-slate-900 relative overflow-hidden isolate">
+                {/* Decorative Blobs */}
+                <div className="absolute top-0 right-0 -mr-40 -mt-20 w-[600px] h-[600px] bg-teal-900/20 rounded-full blur-[100px] -z-10"></div>
+                <div className="absolute bottom-0 left-0 -ml-40 -mb-20 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[100px] -z-10"></div>
 
-                        <div className="flex flex-col sm:flex-row gap-4">
+                <div className="mx-4 lg:mx-[10%] relative z-10">
+                    <div className="max-w-3xl mx-auto text-center">
+                        <span className="text-teal-500 font-bold tracking-widest uppercase text-xs mb-2 block">Stay Connected</span>
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Join the PlusWay Family</h2>
+                        <p className="text-slate-400 mb-10 text-lg leading-relaxed">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals sent directly to your inbox.</p>
+
+                        <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
                             <input
                                 type="email"
                                 placeholder="Enter your email address"
-                                className="flex-1 px-6 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 backdrop-blur-sm"
+                                className="flex-1 px-6 py-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 backdrop-blur-sm transition-all focus:bg-white/10"
                             />
-                            <button className="px-8 py-4 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl transition-colors shadow-lg hover:shadow-teal-500/25">
+                            <button className="px-8 py-4 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-teal-500/25 hover:-translate-y-0.5 active:translate-y-0">
                                 Subscribe
                             </button>
                         </div>
-                        <p className="text-slate-500 text-sm mt-4">No spam, just tech updates.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* Features Strip */}
-            <section className="py-10 border-t border-gray-100 bg-white">
-                <div className="mx-4 lg:mx-[10%]">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                        <div className="flex items-center justify-center gap-4 py-4 md:py-0">
-                            <span className="text-4xl">🚚</span>
-                            <div>
-                                <h3 className="font-bold text-slate-900 uppercase tracking-wide text-sm">Free Shipping</h3>
-                                <p className="text-slate-500 text-xs mt-1">On all orders over ₹499</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-center gap-4 py-4 md:py-0">
-                            <span className="text-4xl">🛡️</span>
-                            <div>
-                                <h3 className="font-bold text-slate-900 uppercase tracking-wide text-sm">Secure Payment</h3>
-                                <p className="text-slate-500 text-xs mt-1">100% protected transactions</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-center gap-4 py-4 md:py-0">
-                            <span className="text-4xl">↩️</span>
-                            <div>
-                                <h3 className="font-bold text-slate-900 uppercase tracking-wide text-sm">Easy Returns</h3>
-                                <p className="text-slate-500 text-xs mt-1">30-day money back guarantee</p>
-                            </div>
-                        </div>
+                        <p className="text-slate-600 text-xs mt-6">We respect your privacy. Unsubscribe at any time.</p>
                     </div>
                 </div>
             </section>
@@ -201,3 +271,4 @@ const Home = () => {
 };
 
 export default Home;
+

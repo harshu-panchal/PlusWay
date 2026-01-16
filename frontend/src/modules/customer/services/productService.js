@@ -7,6 +7,7 @@ export const productService = {
         if (params.minPrice) queryParams.append('minPrice', params.minPrice);
         if (params.maxPrice) queryParams.append('maxPrice', params.maxPrice);
         if (params.sort) queryParams.append('sort', params.sort);
+        if (params.search) queryParams.append('search', params.search);
 
         // Handle dynamic attributes (e.g. attributes[Brand]=Apple)
         if (params.attributes) {

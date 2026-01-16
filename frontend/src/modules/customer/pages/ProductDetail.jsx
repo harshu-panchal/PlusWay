@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { ShoppingCart, Star, Truck, ShieldCheck, Heart } from 'lucide-react';
 import Button from '../../../shared/components/ui/Button';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../store/slices/cartSlice';
+import ReviewModal from '../components/ReviewModal';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 const ProductDetail = () => {
     const { slug } = useParams();
@@ -11,14 +17,95 @@ const ProductDetail = () => {
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [activeImage, setActiveImage] = useState(0);
     const [activeTab, setActiveTab] = useState('description');
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [reviews, setReviews] = useState([]);
+    const [refreshReviews, setRefreshReviews] = useState(0); // Trigger to re-fetch reviews
+    const [isWishlisted, setIsWishlisted] = useState(false); // Wishlist state
+
+    const dispatch = useDispatch();
+    const { loading: loadingCart } = useSelector(state => state.cart);
+
+    const handleAddToCart = () => {
+        if (!product) return;
+        dispatch(addToCart({
+            productId: product._id,
+            quantity: 1, // Logic for quantity selector can be added later if needed in UI
+            variant: selectedVariant
+        }));
+    };
 
     const [relatedProducts, setRelatedProducts] = useState([]);
 
     useEffect(() => {
+        const fetchReviews = async () => {
+            if (!product?._id) return;
+            try {
+                const res = await axios.get(`${API_URL}/reviews/product/${product._id}`);
+                setReviews(res.data.data);
+            } catch (err) {
+                console.error("Failed to fetch reviews", err);
+            }
+        };
+
+        const checkWishlist = async () => {
+            if (!product?._id) return;
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return; // Not logged in
+
+                const res = await axios.get(`${API_URL}/wishlist`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const exists = res.data.data.some(p => p._id === product._id);
+                setIsWishlisted(exists);
+            } catch (err) {
+                // console.error("Failed to check wishlist", err);
+            }
+        };
+
+        if (product?._id) {
+            fetchReviews();
+            checkWishlist();
+        }
+    }, [product?._id, refreshReviews]); // Run when product changes or refresh triggered
+
+    const navigate = useNavigate();
+
+    const handleToggleWishlist = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+
+        try {
+            await axios.post(`${API_URL}/wishlist/toggle/${product._id}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setIsWishlisted(!isWishlisted);
+        } catch (err) {
+            console.error("Failed to toggle wishlist", err);
+            // ... handle 401
+            if (err.response?.status === 401) {
+                // alert("Session expired"); // Optional, maybe too intrusive
+                localStorage.removeItem('token');
+                navigate('/login');
+            }
+        }
+    };
+
+    useEffect(() => {
         const fetchProduct = async () => {
             try {
-                // Fetch by slug
-                const data = await productService.getProductBySlug(slug);
+                // Fetch by slug OR id
+                let data;
+                const isId = /^[0-9a-fA-F]{24}$/.test(slug);
+
+                if (isId) {
+                    data = await productService.getProductById(slug);
+                } else {
+                    data = await productService.getProductBySlug(slug);
+                }
                 setProduct(data);
                 // Auto-select first variant if exists
                 if (data.hasVariants && data.variants.length > 0) {
@@ -28,17 +115,10 @@ const ProductDetail = () => {
                 }
                 setActiveImage(0); // Reset image on product change
 
-                // Fetch Related Products
-                if (data.category?.slug) {
-                    const relatedData = await productService.getAllProducts({
-                        categorySlug: data.category.slug,
-                        limit: 4 // Assuming API/Service supports limit, or returns all and we slice
-                    });
-                    // Filter out current product
-                    const related = (relatedData.products || [])
-                        .filter(p => p._id !== data._id)
-                        .slice(0, 4);
-                    setRelatedProducts(related);
+                // Fetch Related Products (Recommendations)
+                if (data._id) {
+                    const relatedRes = await axios.get(`${API_URL}/products/${data._id}/recommendations`);
+                    setRelatedProducts(relatedRes.data);
                 }
 
             } catch (error) {
@@ -57,14 +137,20 @@ const ProductDetail = () => {
     const currentStock = selectedVariant?.stock || product.stock;
     const isOutOfStock = currentStock <= 0;
 
+    // Construct gallery images ensuring mainImage is first
+    const galleryImages = [
+        product.mainImage,
+        ...(product.images || [])
+    ].filter((img, index, self) => img && self.indexOf(img) === index);
+
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="mx-4 lg:mx-[10%] py-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 {/* Image Gallery */}
                 <div className="space-y-4">
                     <div className="aspect-square bg-white rounded-2xl border border-gray-100 flex items-center justify-center p-8 overflow-hidden relative group">
-                        {product.images?.length > 0 ? (
-                            <img src={product.images[activeImage]} alt={product.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+                        {galleryImages.length > 0 ? (
+                            <img src={galleryImages[activeImage]} alt={product.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
                         ) : (
                             <div className="text-gray-300">No Image Available</div>
                         )}
@@ -73,14 +159,17 @@ const ProductDetail = () => {
                                 BEST SELLER
                             </span>
                         )}
-                        <button className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 transition-colors shadow-sm">
-                            <Heart className="w-5 h-5" />
+                        <button
+                            onClick={handleToggleWishlist}
+                            className={`absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm ${isWishlisted ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+                        >
+                            <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
                         </button>
                     </div>
                     {/* Thumbnails if multiple images */}
-                    {product.images?.length > 1 && (
+                    {galleryImages.length > 1 && (
                         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                            {product.images.map((img, idx) => (
+                            {galleryImages.map((img, idx) => (
                                 <button
                                     key={idx}
                                     onClick={() => setActiveImage(idx)}
@@ -101,14 +190,24 @@ const ProductDetail = () => {
                     <h1 className="text-3xl font-extrabold text-slate-900 mb-2 leading-tight">{product.title}</h1>
 
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="flex text-yellow-400">
-                            {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-4 h-4 fill-current" />)}
+                        <div className="flex text-yellow-400 items-center gap-1">
+                            <div className="flex">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                    <Star
+                                        key={i}
+                                        className={`w-4 h-4 ${i <= Math.round(product.averageRating || 0) ? 'fill-current' : 'text-gray-300 fill-gray-300'}`}
+                                    />
+                                ))}
+                            </div>
+                            <span className="text-sm font-bold ml-1 text-gray-700">{product.averageRating?.toFixed(1) || '0.0'}</span>
                         </div>
-                        <span className="text-sm text-gray-500 font-medium">(12 reviews)</span>
+                        <span className="text-sm text-gray-500 font-medium border-l pl-4 border-gray-300">
+                            {product.numReviews} {product.numReviews === 1 ? 'Review' : 'Reviews'}
+                        </span>
                         {isOutOfStock ? (
-                            <span className="text-sm text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded">Out of Stock</span>
+                            <span className="text-sm text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded ml-auto">Out of Stock</span>
                         ) : (
-                            <span className="text-sm text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded">In Stock</span>
+                            <span className="text-sm text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded ml-auto">In Stock</span>
                         )}
                     </div>
 
@@ -154,11 +253,12 @@ const ProductDetail = () => {
                         <div className="flex-1">
                             <Button
                                 size="lg"
-                                disabled={isOutOfStock}
+                                disabled={isOutOfStock || loadingCart}
+                                onClick={handleAddToCart}
                                 className="w-full flex items-center justify-center gap-2 h-14 text-lg"
                             >
                                 <ShoppingCart className="w-5 h-5" />
-                                {isOutOfStock ? 'Notify Me' : 'Add to Cart'}
+                                {isOutOfStock ? 'Notify Me' : (loadingCart ? 'Adding...' : 'Add to Cart')}
                             </Button>
                         </div>
                         <Button variant="outline" size="lg" className="h-14 px-8" disabled={isOutOfStock}>
@@ -240,15 +340,60 @@ const ProductDetail = () => {
                     )}
 
                     {activeTab === 'reviews' && (
-                        <div className="text-center py-10 bg-gray-50 rounded-xl">
-                            <Star className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                            <h3 className="font-bold text-gray-900">No reviews yet</h3>
-                            <p className="text-gray-500 mb-4">Be the first to review this product!</p>
-                            <Button variant="outline" size="sm">Write a Review</Button>
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="font-bold text-gray-900 text-lg">Customer Reviews</h3>
+                                <Button onClick={() => setIsReviewModalOpen(true)}>Write a Review</Button>
+                            </div>
+
+                            {reviews.length === 0 ? (
+                                <div className="text-center py-10 bg-gray-50 rounded-xl">
+                                    <Star className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                                    <h3 className="font-bold text-gray-900">No reviews yet</h3>
+                                    <p className="text-gray-500 mb-4">Be the first to review this product!</p>
+                                    <Button variant="outline" size="sm" onClick={() => setIsReviewModalOpen(true)}>Write a Review</Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {reviews.map(review => (
+                                        <div key={review._id} className="bg-gray-50 p-4 rounded-xl">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold">
+                                                        {review.user?.name?.charAt(0) || 'U'}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-gray-900">{review.user?.name || 'Anonymous'}</h4>
+                                                        <div className="flex text-yellow-400 text-xs">
+                                                            {[1, 2, 3, 4, 5].map(i => (
+                                                                <Star
+                                                                    key={i}
+                                                                    className={`w-3 h-3 ${i <= review.rating ? 'fill-current' : 'text-gray-300 fill-gray-300'}`}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span className="text-xs text-gray-400">
+                                                    {new Date(review.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <p className="text-gray-700 text-sm">{review.comment}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
             </div>
+
+            <ReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+                productId={product._id}
+                onSubmitSuccess={() => setRefreshReviews(prev => prev + 1)}
+            />
 
             {/* Related Products */}
             {relatedProducts.length > 0 && (

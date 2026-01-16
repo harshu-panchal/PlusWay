@@ -30,7 +30,7 @@ const HeroCarousel = () => {
     const displayBanners = banners.length > 0 ? banners : [
         {
             _id: 'default',
-            title: 'Welcome to AppZeto',
+            title: 'Welcome to PlusWay',
             subtitle: 'Premium Mobile Accessories',
             image: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=1200&h=400&fit=crop',
             bgColor: 'from-cyan-400 to-cyan-600',
@@ -83,27 +83,19 @@ const HeroCarousel = () => {
                                 : 'opacity-0 translate-x-full'
                             }`}
                     >
-                        <div className={`w-full h-full bg-gradient-to-r ${banner.bgColor || 'from-gray-800 to-gray-900'} relative`}>
-                            {/* Background Image */}
+                        <div className="w-full h-full relative">
+                            {/* Full Banner Image */}
                             <img
                                 src={banner.image}
-                                alt={banner.title}
-                                className="w-full h-full object-cover mix-blend-overlay opacity-40"
+                                alt={banner.title || 'Banner'}
+                                className="w-full h-full object-cover"
                             />
 
-                            {/* Content Overlay */}
-                            <div className="absolute inset-0 flex items-center justify-center md:justify-start">
-                                <div className="text-white px-8 md:px-16 max-w-2xl">
-                                    <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 animate-fade-in-up">
-                                        {banner.title}
-                                    </h2>
-                                    <p className="text-lg md:text-2xl lg:text-3xl mb-6 animate-fade-in-up animation-delay-200">
-                                        {banner.subtitle}
-                                    </p>
-                                    <Link to={banner.link || '/products'} className="inline-block bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg animate-fade-in-up animation-delay-400">
-                                        Shop Now
-                                    </Link>
-                                </div>
+                            {/* Shop Now Button */}
+                            <div className="absolute bottom-8 left-8 md:bottom-12 md:left-16">
+                                <Link to={banner.link || '/products'} className="inline-block bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg">
+                                    Shop Now
+                                </Link>
                             </div>
                         </div>
                     </div>

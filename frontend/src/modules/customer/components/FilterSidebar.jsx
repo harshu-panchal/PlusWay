@@ -1,73 +1,130 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const FilterSidebar = ({
     categories,
     activeCategorySlug,
     activeFilters,
     onFilterChange,
-    onClearFilters
+    onClearFilters,
+    currentPath, // New prop: the current URL path like "/schutzglas/fuer-iphone-550"
+    onLocalSearch // New prop: callback to set local search filter
 }) => {
     // Helper to find active category object
     const activeCategory = categories.find(c => c.slug === activeCategorySlug);
 
-    // Filter categories to show hierarchy relevant to active one
-    // Logic: Show Root Categories. If Root is active, show its children. 
-    // If Child is active, show its siblings and parent.
-    // Walker style: Sidebar is a tree.
+    // Filter Logic:
+    // 1. If active category has children -> Show active category as Header, Children as list.
+    // 2. If active category has NO children (Leaf) -> Show Parent as Header, Siblings (Parent's children) as list.
+    // 3. Keep "Parent" context when clicking siblings.
 
-    // Recursive Tree Renderer
-    const renderCategoryTree = (parentId = null, depth = 0) => {
+    let displayCategory = activeCategory;
+    let subcategories = [];
+
+    if (activeCategory) {
+        // Check for children
         const children = categories
-            .filter(c => c.parent === parentId || (!c.parent && !parentId))
-            .sort((a, b) => a.order - b.order);
+            .filter(c => c.parent === activeCategory._id)
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-        if (children.length === 0) return null;
+        if (children.length > 0) {
+            // Case 1: Has children (Parent Node)
+            subcategories = children;
+            displayCategory = activeCategory;
+        } else if (activeCategory.parent) {
+            // Case 2: Leaf node, show siblings
+            const parent = categories.find(c => c._id === activeCategory.parent);
+            if (parent) {
+                displayCategory = parent;
+                subcategories = categories
+                    .filter(c => c.parent === parent._id)
+                    .sort((a, b) => (a.order || 0) - (b.order || 0));
+            }
+        }
+    }
 
-        return (
-            <ul className={`space-y-1 ${depth > 0 ? 'ml-4 mt-1 border-l border-gray-100 pl-2' : ''}`}>
-                {children.map(cat => {
-                    const isActive = cat.slug === activeCategorySlug;
-                    const isAncestor = activeCategory && (
-                        activeCategory._id === cat._id ||
-                        activeCategory.ancestors?.includes(cat._id) // If we had ancestors populated
-                        // Simplification: Check if active category is a child of this cat
-                        // We need a better way to check ancestry on frontend or just rely on expanded state
-                    );
-
-                    // Allow expansion if it has children
-                    const hasChildren = categories.some(c => c.parent === cat._id);
-                    const isExpanded = isActive || hasChildren; // Simplified expansion
-
-                    return (
-                        <li key={cat._id}>
-                            <a
-                                href={`/c/${cat.slug}`}
-                                className={`flex items-center justify-between text-sm py-1.5 hover:text-teal-600 transition-colors
-                                    ${isActive ? 'text-teal-600 font-bold' : 'text-gray-600'}
-                                `}
-                            >
-                                <span>{cat.name}</span>
-                                {hasChildren && (
-                                    <span className="text-gray-300">
-                                        {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                                    </span>
-                                )}
-                            </a>
-                            {hasChildren && isExpanded && renderCategoryTree(cat._id, depth + 1)}
-                        </li>
-                    );
-                })}
-            </ul>
-        );
+    // Build nested URL for a subcategory
+    const buildNestedUrl = (subcategory) => {
+        if (currentPath) {
+            // If the active category matches the display category (Header),
+            // it means we are at the Parent level, so we append the child slug.
+            if (displayCategory?._id === activeCategory?._id) {
+                return `${currentPath}/${subcategory.slug}`;
+            }
+            // If they don't match, we are at the Child (Leaf) level.
+            // So we want to switch siblings by replacing the last segment.
+            else {
+                const parts = currentPath.split('/');
+                // Handle edge case where split might result in empty parts (e.g. leading /)
+                // Assuming well-formed paths from router
+                return `${parts.slice(0, -1).join('/')}/${subcategory.slug}`;
+            }
+        }
+        return `/c/${subcategory.slug}`;
     };
 
     return (
         <aside className="w-full lg:w-64 flex-shrink-0 space-y-8">
-            {/* Categories */}
+            {/* Current Category with Subcategories - Walker Style */}
             <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-                <h3 className="font-bold text-gray-900 mb-4 border-b pb-2">Categories</h3>
-                {renderCategoryTree(null)}
+                {/* Active Category as heading */}
+                <h3 className="font-bold text-gray-900 mb-4 border-b pb-2">
+                    {displayCategory?.name || 'Categories'}
+                    {displayCategory?.productCount && (
+                        <span className="text-gray-400 font-normal"> ({displayCategory.productCount})</span>
+                    )}
+                </h3>
+
+                {/* Show only subcategories of the current category */}
+                {subcategories.length > 0 ? (
+                    <ul className="space-y-1">
+                        {subcategories.map(cat => {
+                            const isActive = cat.slug === activeCategorySlug;
+                            const nestedUrl = buildNestedUrl(cat);
+
+                            // Check if this subcategory is a leaf (has no children)
+                            const hasChildren = categories.some(c => c.parent === cat._id);
+                            const isLeafCategory = !hasChildren;
+
+                            // For leaf categories, use button to set local search instead of navigation
+                            if (isLeafCategory && onLocalSearch) {
+                                return (
+                                    <li key={cat._id}>
+                                        <button
+                                            onClick={() => onLocalSearch(cat.name)}
+                                            className={`flex items-center justify-between text-sm py-1.5 hover:text-teal-600 transition-colors w-full text-left
+                                                ${isActive ? 'text-teal-600 font-bold' : 'text-gray-600'}
+                                            `}
+                                        >
+                                            <span>{cat.name}</span>
+                                            {cat.productCount && (
+                                                <span className="text-gray-400 text-xs">({cat.productCount})</span>
+                                            )}
+                                        </button>
+                                    </li>
+                                );
+                            }
+
+                            return (
+                                <li key={cat._id}>
+                                    <Link
+                                        to={nestedUrl}
+                                        className={`flex items-center justify-between text-sm py-1.5 hover:text-teal-600 transition-colors
+                                            ${isActive ? 'text-teal-600 font-bold' : 'text-gray-600'}
+                                        `}
+                                    >
+                                        <span>{cat.name}</span>
+                                        {cat.productCount && (
+                                            <span className="text-gray-400 text-xs">({cat.productCount})</span>
+                                        )}
+                                    </Link>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                ) : (
+                    <p className="text-sm text-gray-400">No subcategories</p>
+                )}
             </div>
 
             {/* Price Filter */}

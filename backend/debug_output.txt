@@ -1,0 +1,18 @@
+--- Categories matching /Charger/i ---
+Name: "Charger", Slug: "charger-1768309738647", ID: 696643ead24ec9bd1b1078ce, Parent: null
+Name: "Car chargers", Slug: "car-chargers-1768309738675", ID: 696643ead24ec9bd1b1078d0, Parent: 696643ead24ec9bd1b1078ce
+Name: "Car chargers with cable", Slug: "car-chargers-with-cable-1768309738702", ID: 696643ead24ec9bd1b1078d2, Parent: 696643ead24ec9bd1b1078ce
+Name: "Network chargers", Slug: "network-chargers-1768309738730", ID: 696643ead24ec9bd1b1078d4, Parent: 696643ead24ec9bd1b1078ce
+Name: "Network chargers with cable", Slug: "network-chargers-with-cable-1768309738758", ID: 696643ead24ec9bd1b1078d6, Parent: 696643ead24ec9bd1b1078ce
+Name: "Wireless chargers", Slug: "wireless-chargers-1768309738786", ID: 696643ead24ec9bd1b1078d8, Parent: 696643ead24ec9bd1b1078ce
+Name: "Car chargers", Slug: "car-chargers-1768309739008", ID: 696643ebd24ec9bd1b1078e8, Parent: 696643ead24ec9bd1b1078e6
+Name: "Car chargers with cable", Slug: "car-chargers-with-cable-1768309739036", ID: 696643ebd24ec9bd1b1078ea, Parent: 696643ead24ec9bd1b1078e6
+Name: "Chargers", Slug: "chargers-1768550301436", ID: 6969ef9dccf63a8bdfbae602, Parent: 696643e8d24ec9bd1b107818
+Name: "Chargers", Slug: "chargers-1768550473661", ID: 6969f049f88c92aeb4dc4cd0, Parent: null
+Name: "Car chargers", Slug: "car-chargers-1768550473853", ID: 6969f049f88c92aeb4dc4cd5, Parent: 6969f049f88c92aeb4dc4cd0
+Name: "Car chargers with cable", Slug: "car-chargers-with-cable-1768550485236", ID: 6969f055f88c92aeb4dc4cf5, Parent: 6969f049f88c92aeb4dc4cd0
+Name: "Network chargers", Slug: "network-chargers-1768550495119", ID: 6969f05ff88c92aeb4dc4d1b, Parent: 6969f049f88c92aeb4dc4cd0
+Name: "Network chargers with cable", Slug: "network-chargers-with-cable-1768550502550", ID: 6969f066f88c92aeb4dc4d3e, Parent: 6969f049f88c92aeb4dc4cd0
+Name: "Wireless chargers", Slug: "wireless-chargers-1768550508048", ID: 6969f06cf88c92aeb4dc4d66, Parent: 6969f049f88c92aeb4dc4cd0
+
+--- Checking for Cyrillic Сharger ---

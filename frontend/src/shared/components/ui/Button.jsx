@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { Loader2 } from 'lucide-react';
 
 const Button = ({
     children,
@@ -8,9 +9,11 @@ const Button = ({
     disabled = false,
     type = 'button',
     className = '',
+    isLoading = false,
+    icon: Icon,
     ...props
 }) => {
-    const baseStyles = 'font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseStyles = 'font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
 
     const variants = {
         primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
@@ -30,10 +33,12 @@ const Button = ({
         <button
             type={type}
             onClick={onClick}
-            disabled={disabled}
+            disabled={disabled || isLoading}
             className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
             {...props}
         >
+            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {!isLoading && Icon && <Icon className="w-4 h-4" />}
             {children}
         </button>
     );
@@ -47,6 +52,8 @@ Button.propTypes = {
     disabled: PropTypes.bool,
     type: PropTypes.oneOf(['button', 'submit', 'reset']),
     className: PropTypes.string,
+    isLoading: PropTypes.bool,
+    icon: PropTypes.elementType,
 };
 
 export default Button;

@@ -2,9 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { categoryService } from '../services/categoryService';
-import { Filter, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { Filter, SlidersHorizontal, ArrowUpDown, Search, X } from 'lucide-react';
 import FilterSidebar from '../components/FilterSidebar';
 import Breadcrumbs from '../components/Breadcrumbs';
+import ProductCard from '../components/ProductCard';
 import Button from '../../../shared/components/ui/Button';
 
 const ProductListing = () => {
@@ -14,9 +15,16 @@ const ProductListing = () => {
     // Determine the active category slug from the deepest URL parameter
     const slug = subsubcategory || subcategory || category;
 
+    // Get search query from URL params
+    const searchQuery = searchParams.get('search') || '';
+    const pageParam = parseInt(searchParams.get('page') || '1');
+    const isFeaturedParam = searchParams.get('isFeatured');
+    const isNewArrivalParam = searchParams.get('isNewArrival');
+
     // Data State
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
     const [loading, setLoading] = useState(true);
     const [loadingProducts, setLoadingProducts] = useState(false);
 
@@ -24,6 +32,7 @@ const ProductListing = () => {
     const [activeFilters, setActiveFilters] = useState({});
     const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [sortBy, setSortBy] = useState('popularity'); // popularity, price_asc, price_desc, newest
+    const [localSearch, setLocalSearch] = useState(''); // Local search within category
 
     // 1. Fetch Categories (Hierarchy) Once
     useEffect(() => {
@@ -38,7 +47,7 @@ const ProductListing = () => {
         fetchCategories();
     }, []);
 
-    // 2. Fetch Products when slug, sort, or filters change
+    // 2. Fetch Products when slug, sort, filters, or search change
     useEffect(() => {
         const loadProducts = async () => {
             setLoadingProducts(true);
@@ -46,15 +55,27 @@ const ProductListing = () => {
                 // Separate attributes from standard filters
                 const { minPrice, maxPrice, ...attributes } = activeFilters;
 
+                // Use localSearch when in category, otherwise use URL search query
+                const effectiveSearch = localSearch || searchQuery;
+
                 const filters = {
                     categorySlug: slug,
                     sort: sortBy,
                     attributes: attributes,
                     minPrice,
-                    maxPrice
+                    maxPrice,
+                    search: effectiveSearch,
+                    page: pageParam,
+                    isFeatured: isFeaturedParam === 'true',
+                    isNewArrival: isNewArrivalParam === 'true',
                 };
                 const data = await productService.getAllProducts(filters);
                 setProducts(data.products || []);
+                setPagination({
+                    page: data.page || 1,
+                    pages: data.pages || 1,
+                    total: data.total || 0
+                });
             } catch (error) {
                 console.error(error);
             } finally {
@@ -63,7 +84,17 @@ const ProductListing = () => {
             }
         };
         loadProducts();
-    }, [slug, sortBy, activeFilters]);
+    }, [slug, sortBy, activeFilters, searchQuery, localSearch, pageParam, isFeaturedParam, isNewArrivalParam]);
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= pagination.pages) {
+            setSearchParams(prev => {
+                prev.set('page', newPage);
+                return prev;
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     const handleFilterChange = (key, value) => {
         setActiveFilters(prev => {
@@ -82,6 +113,16 @@ const ProductListing = () => {
     };
 
     const activeCategory = categories.find(c => c.slug === slug);
+
+    // Build currentPath from URL params for nested URL construction
+    // e.g., if we're at /schutzglas/fuer-iphone-550, currentPath = "/schutzglas/fuer-iphone-550"
+    const currentPath = useMemo(() => {
+        const parts = [];
+        if (category) parts.push(category);
+        if (subcategory) parts.push(subcategory);
+        if (subsubcategory) parts.push(subsubcategory);
+        return parts.length > 0 ? '/' + parts.join('/') : '';
+    }, [category, subcategory, subsubcategory]);
 
     // Generate Breadcrumbs
     const breadcrumbItems = useMemo(() => {
@@ -129,17 +170,51 @@ const ProductListing = () => {
 
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="mx-4 lg:mx-[10%] py-8">
             <Breadcrumbs items={breadcrumbItems} />
 
             {/* Header section with sort and mobile filter toggle */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">{activeCategory?.name || 'All Products'}</h1>
-                    {slug && <p className="text-slate-500 text-sm mt-1">Found {products.length} items</p>}
+                    <h1 className="text-3xl font-bold text-slate-900">
+                        {localSearch ? localSearch : (searchQuery ? `Search: "${searchQuery}"` : (activeCategory?.name || 'All Products'))}
+                    </h1>
+                    {localSearch && (
+                        <p className="text-teal-600 text-sm mt-1 flex items-center gap-2">
+                            Filtering in {activeCategory?.name || 'All Products'}
+                            <button
+                                onClick={() => setLocalSearch('')}
+                                className="text-xs text-gray-400 hover:text-red-500 underline"
+                            >
+                                Clear filter
+                            </button>
+                        </p>
+                    )}
+                    <p className="text-slate-500 text-sm mt-1">Found {products.length} items</p>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
+                    {/* Local Search within category */}
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search in this category..."
+                            value={localSearch}
+                            onChange={(e) => setLocalSearch(e.target.value)}
+                            className="w-48 sm:w-64 pl-4 pr-10 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-all"
+                        />
+                        {localSearch ? (
+                            <button
+                                onClick={() => setLocalSearch('')}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        ) : (
+                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        )}
+                    </div>
+
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-500 hidden sm:inline">Sort by:</span>
                         <select
@@ -179,6 +254,8 @@ const ProductListing = () => {
                             activeFilters={activeFilters}
                             onFilterChange={handleFilterChange}
                             onClearFilters={clearFilters}
+                            currentPath={currentPath}
+                            onLocalSearch={setLocalSearch}
                         />
                     </div>
                 </div>
@@ -201,45 +278,35 @@ const ProductListing = () => {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {products.map((product) => (
-                                <Link to={`/product/${product.slug || product._id}`} key={product._id} className="group bg-white rounded-xl border border-gray-100 p-4 transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col">
-                                    <div className="aspect-square bg-gray-50 rounded-lg mb-4 flex items-center justify-center overflow-hidden relative">
-                                        {/* Badges */}
-                                        {(product.isNewArrival || product.isBestSeller) && (
-                                            <div className="absolute top-2 left-2 flex flex-col gap-1">
-                                                {product.isNewArrival && <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">NEW</span>}
-                                                {product.isBestSeller && <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">HOT</span>}
-                                            </div>
-                                        )}
-
-                                        {product.mainImage ? (
-                                            <img src={product.mainImage} alt={product.title} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
-                                        ) : (
-                                            <div className="text-gray-300 text-xs">No Image</div>
-                                        )}
-
-                                        {/* Quick View trigger could go here */}
-                                    </div>
-
-                                    <div className="flex-1 flex flex-col">
-                                        <p className="text-xs text-teal-600 font-bold mb-1 uppercase tracking-wider line-clamp-1">{product.category?.name}</p>
-                                        <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 text-sm min-h-[2.5em]" title={product.title}>{product.title}</h3>
-
-                                        <div className="mt-auto flex items-end justify-between">
-                                            <div className="flex flex-col">
-                                                {product.basePrice * 1.2 > product.basePrice && (
-                                                    <span className="text-xs text-gray-400 line-through">₹{Math.round(product.basePrice * 1.2)}</span>
-                                                )}
-                                                <span className="text-lg font-extrabold text-slate-900">₹{product.basePrice}</span>
-                                            </div>
-                                            {product.hasVariants && (
-                                                <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded-full font-medium">
-                                                    {product.variants.length} Options
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </Link>
+                                <ProductCard key={product._id} product={product} />
                             ))}
+                        </div>
+                    )}
+
+                    {/* Pagination */}
+                    {pagination.pages > 1 && (
+                        <div className="flex justify-center mt-8">
+                            <div className="flex bg-white rounded-lg border border-gray-200 shadow-sm">
+                                <button
+                                    onClick={() => handlePageChange(pagination.page - 1)}
+                                    disabled={pagination.page === 1}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-r border-gray-200 rounded-l-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Previous
+                                </button>
+
+                                <div className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
+                                    Page {pagination.page} of {pagination.pages}
+                                </div>
+
+                                <button
+                                    onClick={() => handlePageChange(pagination.page + 1)}
+                                    disabled={pagination.page === pagination.pages}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-r-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

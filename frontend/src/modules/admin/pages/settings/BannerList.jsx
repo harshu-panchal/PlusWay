@@ -111,51 +111,140 @@ const BannerList = () => {
 
 const BannerForm = ({ banner, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
-        title: '', subtitle: '', image: '', position: 'hero', isActive: true, link: '/'
+        title: '',
+        subtitle: '',
+        image: '',
+        position: 'hero',
+        isActive: true,
+        link: '/',
+        bgColor: 'from-gray-800 to-gray-900',
+        order: 0
     });
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
-        if (banner) setFormData(banner);
+        if (banner) setFormData({
+            ...banner,
+            bgColor: banner.bgColor || 'from-gray-800 to-gray-900',
+            order: banner.order || 0
+        });
     }, [banner]);
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const uploadData = new FormData();
+        uploadData.append('image', file);
+
+        try {
+            setUploading(true);
+            const response = await fetch(`${API_URL}/upload`, {
+                method: 'POST',
+                body: uploadData
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                setFormData(prev => ({ ...prev, image: data.url }));
+            } else {
+                alert('Upload failed: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Upload Error:', error);
+            alert('Upload failed');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const url = banner ? `${API_URL}/banners/${banner._id}` : `${API_URL}/banners`;
         const method = banner ? 'PUT' : 'POST';
 
-        await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-        onSave();
+        try {
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                onSave();
+            } else {
+                const data = await response.json();
+                alert('Error: ' + data.error);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Network error');
+        }
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <Input label="Title" name="title" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required />
-            <Input label="Subtitle" name="subtitle" value={formData.subtitle} onChange={e => setFormData({ ...formData, subtitle: e.target.value })} />
+            <Input
+                label="Title"
+                name="title"
+                value={formData.title}
+                onChange={e => setFormData({ ...formData, title: e.target.value })}
+                required
+            />
 
+            <Input
+                label="Subtitle"
+                name="subtitle"
+                value={formData.subtitle}
+                onChange={e => setFormData({ ...formData, subtitle: e.target.value })}
+            />
+
+            {/* Image Upload */}
             <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Image URL</label>
-                <div className="flex gap-2">
+                <label className="text-sm font-medium text-gray-700">Banner Image</label>
+                <div className="flex gap-2 items-center">
                     <input
-                        type="url"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
-                        value={formData.image}
-                        onChange={e => setFormData({ ...formData, image: e.target.value })}
-                        placeholder="https://..."
-                        required
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="block w-full text-sm text-slate-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-teal-50 file:text-teal-700
+                            hover:file:bg-teal-100
+                        "
                     />
+                    {uploading && <span className="text-xs text-teal-600 font-medium animate-pulse">Uploading...</span>}
                 </div>
-                {formData.image && <img src={formData.image} alt="Preview" className="h-20 w-auto object-cover rounded mt-2 border" />}
+                {formData.image && (
+                    <div className="relative mt-2 w-full h-32 rounded-lg overflow-hidden border border-gray-200 group">
+                        <img
+                            src={formData.image}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <Trash className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
+                <input
+                    type="hidden"
+                    required
+                    value={formData.image}
+                /> {/* Hidden required input to force validation */}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700">Position</label>
                     <select
-                        className="px-4 py-2 border border-gray-300 rounded-lg"
+                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none bg-white"
                         value={formData.position}
                         onChange={e => setFormData({ ...formData, position: e.target.value })}
                     >
@@ -166,10 +255,33 @@ const BannerForm = ({ banner, onSave, onCancel }) => {
                 </div>
 
                 <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">Sort Order</label>
+                    <input
+                        type="number"
+                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+                        value={formData.order}
+                        onChange={e => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                    />
+                </div>
+            </div>
+
+            {/* Background Gradient & Link */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">Background Gradient (Tailwind)</label>
+                    <input
+                        type="text"
+                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+                        value={formData.bgColor}
+                        onChange={e => setFormData({ ...formData, bgColor: e.target.value })}
+                        placeholder="e.g. from-purple-800 to-indigo-900"
+                    />
+                </div>
+                <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700">Link URL</label>
                     <input
                         type="text"
-                        className="px-4 py-2 border border-gray-300 rounded-lg"
+                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
                         value={formData.link}
                         onChange={e => setFormData({ ...formData, link: e.target.value })}
                     />
@@ -182,14 +294,16 @@ const BannerForm = ({ banner, onSave, onCancel }) => {
                     id="isActive"
                     checked={formData.isActive}
                     onChange={e => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="w-4 h-4 text-teal-600 rounded"
+                    className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500"
                 />
-                <label htmlFor="isActive" className="text-sm font-medium text-gray-700">Active</label>
+                <label htmlFor="isActive" className="text-sm font-medium text-gray-700 cursor-pointer">Active</label>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-4">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-                <Button type="submit">Save Banner</Button>
+                <Button type="submit" disabled={uploading}>
+                    {banner ? 'Update Banner' : 'Create Banner'}
+                </Button>
             </div>
         </form>
     );

@@ -1,8 +1,27 @@
 const Category = require('../models/Category');
 
+// Helper to generate slug
+const generateSlug = (name) => {
+    return name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+};
+
 exports.createCategory = async (req, res) => {
     try {
-        const category = new Category(req.body);
+        const { name } = req.body;
+        let { slug } = req.body;
+
+        if (!slug && name) {
+            slug = generateSlug(name);
+        }
+
+        const category = new Category({
+            ...req.body,
+            slug
+        });
+
         await category.save();
         res.status(201).json(category);
     } catch (err) {

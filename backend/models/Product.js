@@ -49,6 +49,11 @@ const productSchema = new mongoose.Schema({
     // Metadata
     isBestSeller: { type: Boolean, default: false },
     isNewArrival: { type: Boolean, default: false },
+    isFeatured: { type: Boolean, default: false },
+    // Ratings
+    averageRating: { type: Number, default: 0 },
+    numReviews: { type: Number, default: 0 },
+
     status: { type: String, enum: ['active', 'draft', 'archived'], default: 'active' }
 
 }, { timestamps: true });

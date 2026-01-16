@@ -41,8 +41,6 @@ const ProductForm = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                // Mock fetch or verify actual service usage
-                // assuming existing logic was fetching from API
                 const response = await fetch(`${API_URL}/categories`);
                 const data = await response.json();
                 setCategories(data);
@@ -52,6 +50,84 @@ const ProductForm = () => {
         };
         fetchCategories();
     }, []);
+
+    // Fetch Product Data in Edit Mode
+    useEffect(() => {
+        if (isEditMode && id) {
+            const fetchProduct = async () => {
+                setLoading(true);
+                try {
+                    const res = await fetch(`${API_URL}/products/${id}`);
+                    const data = await res.json();
+                    if (res.ok) {
+                        setFormData({
+                            title: data.title || '',
+                            description: data.description || '',
+                            sku: data.sku || '',
+                            basePrice: data.basePrice || '',
+                            category: data.category?._id || data.category || '',
+                            mainImage: data.mainImage || '',
+                            hasVariants: data.hasVariants || false,
+                            variants: Array.isArray(data.variants)
+                                ? data.variants.map(v => ({
+                                    name: v.name || '',
+                                    sku: v.sku || '',
+                                    price: v.price || '',
+                                    stock: v.stock || ''
+                                }))
+                                : [],
+                            specs: Array.isArray(data.specs)
+                                ? data.specs.map(s => ({
+                                    label: s.label || '',
+                                    value: s.value || ''
+                                }))
+                                : [],
+                            images: Array.isArray(data.images) ? data.images : [],
+                            attributes: data.attributes || {}
+                        });
+                    } else {
+                        alert("Failed to load product");
+                    }
+                } catch (err) {
+                    console.error("Error loading product", err);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchProduct();
+        }
+    }, [isEditMode, id]);
+
+    // Reconstruct Category Hierarchy when categories and formData.category are ready
+    useEffect(() => {
+        if (categories.length > 0 && formData.category) {
+            const catId = formData.category;
+            const cat = categories.find(c => c._id === catId);
+
+            if (cat) {
+                // Update Available Attributes first
+                const attrs = getAttributesForCategory(catId);
+                setAvailableAttributes(attrs);
+
+                // Set Dropdowns
+                if (cat.level === 0) {
+                    setSelectedRoot(cat._id);
+                } else if (cat.level === 1) {
+                    setSelectedRoot(cat.parent);
+                    setSelectedSub(cat._id);
+                } else if (cat.level === 2) {
+                    // Find parent to get root
+                    const parent = categories.find(p => p._id === cat.parent);
+                    if (parent) {
+                        setSelectedRoot(parent.parent);
+                        setSelectedSub(parent._id);
+                        setSelectedSubSub(cat._id);
+                    }
+                }
+            }
+        }
+    }, [categories.length, formData.category]); // Triggers when categories load or category changes externally
+
 
     // Helper to traverse up and collect attributes
     const getAttributesForCategory = (catId) => {
