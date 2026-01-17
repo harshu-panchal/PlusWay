@@ -39,8 +39,9 @@ const Checkout = () => {
     useEffect(() => {
         const fetchAddresses = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/addresses', {
-                    withCredentials: true
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/addresses`, {
+                    headers: { Authorization: `Bearer ${token}` }
                 });
                 setSavedAddresses(res.data);
 

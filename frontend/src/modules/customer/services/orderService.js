@@ -13,11 +13,15 @@ export const orderService = {
             ...getIdentifyParams(),
             shippingAddress
         };
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+        };
         const response = await fetch(`${API_URL}/orders/create`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(body),
-            credentials: 'include'
         });
         if (!response.ok) {
             const error = await response.json();
@@ -27,11 +31,15 @@ export const orderService = {
     },
 
     verifyPayment: async (paymentData) => {
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+        };
         const response = await fetch(`${API_URL}/orders/verify`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(paymentData),
-            credentials: 'include'
         });
         if (!response.ok) {
             const error = await response.json();
@@ -41,10 +49,14 @@ export const orderService = {
     },
 
     getMyOrders: async () => {
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+        };
         const response = await fetch(`${API_URL}/orders/my-orders`, {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include'
+            headers,
         });
 
         if (!response.ok) {

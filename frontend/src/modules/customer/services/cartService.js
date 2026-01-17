@@ -23,10 +23,20 @@ const getIdentifyParams = () => {
     return params;
 };
 
+const getHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+};
+
 export const cartService = {
     getCart: async () => {
         const params = new URLSearchParams(getIdentifyParams());
-        const response = await fetch(`${API_URL}/cart?${params.toString()}`);
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const response = await fetch(`${API_URL}/cart?${params.toString()}`, { headers });
         if (!response.ok) throw new Error('Failed to fetch cart');
         return await response.json();
     },
@@ -38,14 +48,17 @@ export const cartService = {
             quantity,
             variant
         };
-        const response = await fetch(`${API_URL}/cart/add`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        if (!response.ok) throw new Error('Failed to add to cart');
-        return await response.json();
-    },
+        quantity,
+            variant
+    };
+    const response = await fetch(`${API_URL}/cart/add`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(body)
+    });
+    if(!response.ok) throw new Error('Failed to add to cart');
+    return await response.json();
+},
 
     updateItem: async (itemId, quantity) => {
         const body = {
@@ -53,37 +66,42 @@ export const cartService = {
             itemId,
             quantity
         };
-        const response = await fetch(`${API_URL}/cart/update`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        if (!response.ok) throw new Error('Failed to update cart item');
-        return await response.json();
+        quantity
+    };
+const response = await fetch(`${API_URL}/cart/update`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify(body)
+});
+if (!response.ok) throw new Error('Failed to update cart item');
+return await response.json();
     },
 
-    removeItem: async (itemId) => {
-        const body = {
-            ...getIdentifyParams(),
-            itemId
-        };
-        const response = await fetch(`${API_URL}/cart/remove`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        if (!response.ok) throw new Error('Failed to remove cart item');
-        return await response.json();
+removeItem: async (itemId) => {
+    const body = {
+        ...getIdentifyParams(),
+        itemId
+    };
+    itemId
+};
+const response = await fetch(`${API_URL}/cart/remove`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(body)
+});
+if (!response.ok) throw new Error('Failed to remove cart item');
+return await response.json();
     },
 
-    clearCart: async () => {
-        const body = { ...getIdentifyParams() };
-        const response = await fetch(`${API_URL}/cart/clear`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        if (!response.ok) throw new Error('Failed to clear cart');
-        return await response.json();
-    }
+clearCart: async () => {
+    const body = { ...getIdentifyParams() };
+    const body = { ...getIdentifyParams() };
+    const response = await fetch(`${API_URL}/cart/clear`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(body)
+    });
+    if (!response.ok) throw new Error('Failed to clear cart');
+    return await response.json();
+}
 };
