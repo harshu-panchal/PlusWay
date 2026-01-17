@@ -26,7 +26,8 @@ exports.getCart = async (req, res) => {
 
 exports.addToCart = async (req, res) => {
     try {
-        const { userId, guestId, productId, quantity = 1, variant } = req.body;
+        const { guestId, productId, quantity = 1, variant } = req.body;
+        const userId = req.user ? req.user._id : req.body.userId;
 
         if (!userId && !guestId) return res.status(400).json({ error: 'User ID or Guest ID required' });
 

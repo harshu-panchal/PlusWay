@@ -24,8 +24,21 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ error: 'User identification required' });
         }
 
-        // Fetch Cart
-        const cart = await Cart.findOne({ $or: [{ user: userId }, { guestId }] }).populate('items.product');
+        // Fetch Cart - Smart Lookup
+        // 1. Try finding by User ID first
+        let cart = null;
+        if (userId) {
+            cart = await Cart.findOne({ user: userId }).populate('items.product');
+        }
+
+        // 2. If user cart is empty or null, try Guest ID
+        if ((!cart || cart.items.length === 0) && guestId) {
+            const guestCart = await Cart.findOne({ guestId }).populate('items.product');
+            // If guest cart exists and has items, use it
+            if (guestCart && guestCart.items.length > 0) {
+                cart = guestCart;
+            }
+        }
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ error: 'Cart is empty' });
