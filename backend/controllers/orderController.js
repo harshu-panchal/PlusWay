@@ -58,7 +58,7 @@ exports.createOrder = async (req, res) => {
             orderItems.push({
                 product: item.product._id,
                 quantity: item.quantity,
-                variant: item.variant,
+                variant: item.variant || undefined,
                 price: price
             });
         }
