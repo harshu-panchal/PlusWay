@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { categoryService } from '../services/categoryService';
 import { Filter, SlidersHorizontal, ArrowUpDown, Search, X } from 'lucide-react';
@@ -11,6 +11,7 @@ import Button from '../../../shared/components/ui/Button';
 const ProductListing = () => {
     const { category, subcategory, subsubcategory } = useParams();
     const [searchParams, setSearchParams] = useSearchParams();
+    const location = useLocation();
 
     // Determine the active category slug from the deepest URL parameter
     const slug = subsubcategory || subcategory || category;
