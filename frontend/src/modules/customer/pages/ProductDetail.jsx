@@ -390,7 +390,7 @@ const ProductDetail = () => {
             />
 
             {/* Related Products */}
-            {recommendations.length > 0 && (
+            {relatedProducts.length > 0 && (
                 <div className="mt-12 sm:mt-16 md:mt-20">
                     <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">You May Also Like</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
