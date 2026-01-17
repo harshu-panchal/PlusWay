@@ -68,8 +68,13 @@ exports.createOrder = async (req, res) => {
             orderItems.push(orderItem);
         }
 
+        if (totalAmount <= 0) {
+            return res.status(400).json({ error: 'Order total cannot be zero.' });
+        }
+
         // Check if Razorpay is configured
         if (!razorpay) {
+            console.error('Razorpay not initialized');
             return res.status(503).json({
                 error: 'Payment service is currently unavailable. Please contact support.'
             });
@@ -77,44 +82,59 @@ exports.createOrder = async (req, res) => {
 
         // Razorpay Order Options
         const options = {
-            amount: totalAmount * 100, // Amount in paise
+            amount: Math.round(totalAmount * 100), // Amount in paise, rounded to integer
             currency: 'INR',
             receipt: `receipt_${Date.now()}`
         };
 
-        const razorpayOrder = await razorpay.orders.create(options);
+        let razorpayOrder;
+        try {
+            console.log('Creating Razorpay order with options:', options);
+            razorpayOrder = await razorpay.orders.create(options);
+        } catch (rpError) {
+            console.error('Razorpay Order Creation Error:', rpError);
+            return res.status(502).json({ error: `Payment Gateway Error: ${rpError.message}` });
+        }
 
         if (!razorpayOrder) {
-            return res.status(500).json({ error: 'Failed to create Razorpay order' });
+            return res.status(500).json({ error: 'Failed to create Razorpay order (No response)' });
         }
 
         // Create DB Order with Pending status
-        // Create DB Order with Pending status
-        const newOrder = new Order({
-            user: userId || undefined,
-            guestId: userId ? undefined : guestId,
-            items: orderItems,
-            totalAmount,
-            shippingAddress,
-            paymentDetails: {
-                razorpay_order_id: razorpayOrder.id
-            },
-            paymentStatus: 'Pending'
-        });
+        try {
+            const newOrder = new Order({
+                user: userId || undefined,
+                guestId: userId ? undefined : guestId,
+                items: orderItems,
+                totalAmount,
+                shippingAddress,
+                paymentDetails: {
+                    razorpay_order_id: razorpayOrder.id
+                },
+                paymentStatus: 'Pending'
+            });
 
-        await newOrder.save();
+            await newOrder.save();
 
-        res.status(201).json({
-            id: newOrder._id,
-            razorpayOrderId: razorpayOrder.id,
-            amount: totalAmount,
-            currency: 'INR',
-            keyIdx: process.env.RAZORPAY_KEY_ID // Send key to frontend convenience
-        });
+            res.status(201).json({
+                id: newOrder._id,
+                razorpayOrderId: razorpayOrder.id,
+                amount: totalAmount,
+                currency: 'INR',
+                keyIdx: process.env.RAZORPAY_KEY_ID
+            });
+        } catch (dbError) {
+            console.error('Database Order Save Error:', dbError);
+            // Return more specific validation error if possible
+            if (dbError.name === 'ValidationError') {
+                return res.status(400).json({ error: `Validation Error: ${dbError.message}` });
+            }
+            return res.status(500).json({ error: `Database Error: ${dbError.message}` });
+        }
 
     } catch (error) {
-        console.error('Create Order Error:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Create Order Unexpected Error:', error);
+        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
     }
 };
 
