@@ -10,8 +10,15 @@ const setupSecurity = require('./middleware/security');
 setupSecurity(app);
 
 // Standard Middleware
+// CORS Configuration - Allow both local development and production origins
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    process.env.FRONTEND_URL
+].filter(Boolean); // Remove undefined values
+
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: allowedOrigins,
     credentials: true
 }));
 app.use(express.json({ limit: '10kb' })); // Limit body size
