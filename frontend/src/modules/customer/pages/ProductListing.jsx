@@ -174,91 +174,111 @@ const ProductListing = () => {
             <Breadcrumbs items={breadcrumbItems} />
 
             {/* Header section with sort and mobile filter toggle */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-900">
-                        {localSearch ? localSearch : (searchQuery ? `Search: "${searchQuery}"` : (activeCategory?.name || 'All Products'))}
-                    </h1>
-                    {localSearch && (
-                        <p className="text-teal-600 text-sm mt-1 flex items-center gap-2">
-                            Filtering in {activeCategory?.name || 'All Products'}
-                            <button
-                                onClick={() => setLocalSearch('')}
-                                className="text-xs text-gray-400 hover:text-red-500 underline"
-                            >
-                                Clear filter
-                            </button>
-                        </p>
-                    )}
-                    <p className="text-slate-500 text-sm mt-1">Found {products.length} items</p>
+            <div className="mx-4 lg:mx-0 py-6 sm:py-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{pageTitle}</h1>
+                {localSearch && (
+                    <p className="text-teal-600 text-sm mt-1 flex items-center gap-2">
+                        Filtering in {activeCategory?.name || 'All Products'}
+                        <button
+                            onClick={() => setLocalSearch('')}
+                            className="text-xs text-gray-400 hover:text-red-500 underline"
+                        >
+                            Clear filter
+                        </button>
+                    </p>
+                )}
+                <p className="text-slate-500 text-sm mt-1">Found {pagination.total} items</p>
+            </div>
+
+            {/* Header Controls */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6">
+                {/* Search */}
+                <div className="relative w-full sm:w-auto sm:flex-1 sm:max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Search products..."
+                        value={localSearch}
+                        onChange={(e) => setLocalSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-sm"
+                    />
                 </div>
 
-                <div className="flex items-center gap-4 flex-wrap">
-                    {/* Local Search within category */}
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder="Search in this category..."
-                            value={localSearch}
-                            onChange={(e) => setLocalSearch(e.target.value)}
-                            className="w-48 sm:w-64 pl-4 pr-10 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-all"
-                        />
-                        {localSearch ? (
-                            <button
-                                onClick={() => setLocalSearch('')}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        ) : (
-                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500 hidden sm:inline">Sort by:</span>
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2.5"
-                        >
-                            <option value="popularity">Popularity</option>
-                            <option value="price_asc">Price: Low to High</option>
-                            <option value="price_desc">Price: High to Low</option>
-                            <option value="newest">Newest Arrivals</option>
-                        </select>
-                    </div>
-
+                <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    {/* Filter Button - Mobile Only */}
                     <button
-                        onClick={() => setShowMobileFilters(!showMobileFilters)}
-                        className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 font-medium"
+                        onClick={() => setShowMobileFilters(true)}
+                        className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex-1 sm:flex-none justify-center min-h-[44px]"
                     >
-                        <Filter className="w-4 h-4" /> Filters
+                        <SlidersHorizontal className="w-4 h-4" />
+                        <span className="text-sm font-medium">Filters</span>
                     </button>
+
+                    {/* Sort Dropdown */}
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="px-3 sm:px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none bg-white text-sm flex-1 sm:flex-none min-h-[44px]"
+                    >
+                        <option value="">Sort by</option>
+                        <option value="popularity">Popularity</option>
+                        <option value="price_asc">Price: Low to High</option>
+                        <option value="price_desc">Price: High to Low</option>
+                        <option value="name_asc">Name: A-Z</option>
+                        <option value="name_desc">Name: Z-A</option>
+                        <option value="newest">Newest Arrivals</option>
+                    </select>
                 </div>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Sidebar Filters */}
-                <div className={`${showMobileFilters ? 'block' : 'hidden'} lg:block fixed inset-0 z-40 lg:static lg:z-auto bg-white lg:bg-transparent overflow-y-auto lg:overflow-visible`}>
-                    {/* Mobile Close Button */}
-                    <div className="lg:hidden p-4 border-b flex justify-between items-center bg-white sticky top-0">
-                        <span className="font-bold text-lg">Filters</span>
-                        <Button variant="ghost" size="sm" onClick={() => setShowMobileFilters(false)}>Close</Button>
-                    </div>
-
-                    <div className="p-4 lg:p-0">
-                        <FilterSidebar
-                            categories={categories}
-                            activeCategorySlug={slug}
-                            activeFilters={activeFilters}
-                            onFilterChange={handleFilterChange}
-                            onClearFilters={clearFilters}
-                            currentPath={currentPath}
-                            onLocalSearch={setLocalSearch}
-                        />
-                    </div>
+                <div className="hidden lg:block lg:w-1/4 xl:w-1/5">
+                    <FilterSidebar
+                        categories={categories}
+                        activeCategorySlug={slug}
+                        activeFilters={activeFilters}
+                        onFilterChange={handleFilterChange}
+                        onClearFilters={clearFilters}
+                        currentPath={location.pathname}
+                        onLocalSearch={setLocalSearch}
+                    />
                 </div>
+
+                {/* Mobile Filter Sidebar */}
+                {showMobileFilters && (
+                    <div className="fixed inset-0 z-40 lg:hidden">
+                        {/* Backdrop */}
+                        <div
+                            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                            onClick={() => setShowMobileFilters(false)}
+                        ></div>
+
+                        {/* Sidebar */}
+                        <div className="absolute inset-y-0 left-0 w-full sm:w-80 bg-white shadow-xl overflow-y-auto">
+                            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between z-10">
+                                <h2 className="text-lg font-bold text-gray-900">Filters</h2>
+                                <button
+                                    onClick={() => setShowMobileFilters(false)}
+                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="p-4 sm:p-6">
+                                <FilterSidebar
+                                    categories={categories}
+                                    activeCategorySlug={slug}
+                                    activeFilters={activeFilters}
+                                    onFilterChange={handleFilterChange}
+                                    onClearFilters={clearFilters}
+                                    currentPath={location.pathname}
+                                    onLocalSearch={setLocalSearch}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Product Grid */}
                 <div className="flex-1 min-h-[500px]">
@@ -276,7 +296,7 @@ const ProductListing = () => {
                             <button onClick={clearFilters} className="mt-4 text-teal-600 font-medium hover:underline">Clear all filters</button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
                             {products.map((product) => (
                                 <ProductCard key={product._id} product={product} />
                             ))}
@@ -284,29 +304,36 @@ const ProductListing = () => {
                     )}
 
                     {/* Pagination */}
-                    {pagination.pages > 1 && (
-                        <div className="flex justify-center mt-8">
-                            <div className="flex bg-white rounded-lg border border-gray-200 shadow-sm">
-                                <button
-                                    onClick={() => handlePageChange(pagination.page - 1)}
-                                    disabled={pagination.page === 1}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-r border-gray-200 rounded-l-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Previous
-                                </button>
-
-                                <div className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border-r border-gray-200">
-                                    Page {pagination.page} of {pagination.pages}
-                                </div>
-
-                                <button
-                                    onClick={() => handlePageChange(pagination.page + 1)}
-                                    disabled={pagination.page === pagination.pages}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-r-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Next
-                                </button>
+                    {totalPages > 1 && (
+                        <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-2">
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-sm min-h-[44px]"
+                            >
+                                Previous
+                            </button>
+                            <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 max-w-full">
+                                {[...Array(totalPages)].map((_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handlePageChange(i + 1)}
+                                        className={`px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm min-w-[44px] min-h-[44px] flex items-center justify-center ${currentPage === i + 1
+                                                ? 'bg-teal-500 text-white'
+                                                : 'border border-gray-200 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                ))}
                             </div>
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-sm min-h-[44px]"
+                            >
+                                Next
+                            </button>
                         </div>
                     )}
                 </div>

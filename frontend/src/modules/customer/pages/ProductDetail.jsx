@@ -144,11 +144,11 @@ const ProductDetail = () => {
     ].filter((img, index, self) => img && self.indexOf(img) === index);
 
     return (
-        <div className="mx-4 lg:mx-[10%] py-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="mx-4 lg:mx-[10%] py-6 sm:py-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
                 {/* Image Gallery */}
-                <div className="space-y-4">
-                    <div className="aspect-square bg-white rounded-2xl border border-gray-100 flex items-center justify-center p-8 overflow-hidden relative group">
+                <div className="space-y-3 sm:space-y-4">
+                    <div className="aspect-square bg-white rounded-xl sm:rounded-2xl border border-gray-100 flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-hidden relative group">
                         {galleryImages.length > 0 ? (
                             <img src={galleryImages[activeImage]} alt={product.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
                         ) : (
@@ -161,19 +161,19 @@ const ProductDetail = () => {
                         )}
                         <button
                             onClick={handleToggleWishlist}
-                            className={`absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm ${isWishlisted ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+                            className={`absolute top-3 right-3 sm:top-4 sm:right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm min-w-[40px] min-h-[40px] flex items-center justify-center ${isWishlisted ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
                         >
-                            <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+                            <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isWishlisted ? 'fill-current' : ''}`} />
                         </button>
                     </div>
                     {/* Thumbnails if multiple images */}
                     {galleryImages.length > 1 && (
-                        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
                             {galleryImages.map((img, idx) => (
                                 <button
                                     key={idx}
                                     onClick={() => setActiveImage(idx)}
-                                    className={`w-20 h-20 rounded-lg border-2 flex-shrink-0 bg-white p-2 transition-all ${activeImage === idx ? 'border-teal-500 ring-2 ring-teal-500/20' : 'border-transparent hover:border-gray-200'}`}
+                                    className={`w-16 h-16 sm:w-20 sm:h-20 rounded-lg border-2 flex-shrink-0 bg-white p-1.5 sm:p-2 transition-all min-w-[64px] ${activeImage === idx ? 'border-teal-500 ring-2 ring-teal-500/20' : 'border-transparent hover:border-gray-200'}`}
                                 >
                                     <img src={img} alt="" className="w-full h-full object-contain" />
                                 </button>
@@ -187,7 +187,7 @@ const ProductDetail = () => {
                     <div className="mb-2 text-sm text-teal-600 font-bold uppercase tracking-wide">
                         {product.category?.name || 'Accessory'}
                     </div>
-                    <h1 className="text-3xl font-extrabold text-slate-900 mb-2 leading-tight">{product.title}</h1>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2 leading-tight">{product.title}</h1>
 
                     <div className="flex items-center gap-4 mb-6">
                         <div className="flex text-yellow-400 items-center gap-1">
@@ -225,21 +225,18 @@ const ProductDetail = () => {
                     </div>
 
                     {/* Variant Selector */}
-                    {product.hasVariants && (
-                        <div className="mb-8">
-                            <h3 className="font-semibold text-gray-900 mb-3 flex justify-between">
-                                <span>Select Model</span>
-                                <span className="text-xs text-gray-500 font-normal">SKU: {selectedVariant?.sku || product.sku}</span>
-                            </h3>
-                            <div className="flex flex-wrap gap-3">
-                                {product.variants.map((variant, idx) => (
+                    {product.variants && product.variants.length > 0 && (
+                        <div className="mb-6 sm:mb-8">
+                            <h3 className="text-sm font-bold text-slate-700 mb-3">Select Variant</h3>
+                            <div className="flex flex-wrap gap-2 sm:gap-3">
+                                {product.variants.map((variant) => (
                                     <button
-                                        key={idx}
-                                        onClick={() => setSelectedVariant(variant)}
-                                        className={`px-4 py-3 rounded-lg border text-sm font-medium transition-all min-w-[3rem] text-center
-                                            ${selectedVariant === variant
-                                                ? 'border-teal-500 bg-teal-600 text-white shadow-md shadow-teal-200'
-                                                : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'}`}
+                                        key={variant._id}
+                                        onClick={() => setSelectedVariant(variant._id)}
+                                        className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 transition-all text-xs sm:text-sm font-medium min-h-[44px] ${selectedVariant === variant._id
+                                                ? 'border-teal-500 bg-teal-50 text-teal-700'
+                                                : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                                            }`}
                                     >
                                         {variant.name}
                                     </button>
@@ -248,25 +245,21 @@ const ProductDetail = () => {
                         </div>
                     )}
 
-                    {/* Actions */}
-                    <div className="flex gap-4 mb-8">
-                        <div className="flex-1">
-                            <Button
-                                size="lg"
-                                disabled={isOutOfStock || loadingCart}
-                                onClick={handleAddToCart}
-                                className="w-full flex items-center justify-center gap-2 h-14 text-lg"
-                            >
-                                <ShoppingCart className="w-5 h-5" />
-                                {isOutOfStock ? 'Notify Me' : (loadingCart ? 'Adding...' : 'Add to Cart')}
-                            </Button>
-                        </div>
-                        <Button variant="outline" size="lg" className="h-14 px-8" disabled={isOutOfStock}>
-                            Buy Now
-                        </Button>
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
+                        <button
+                            onClick={handleAddToCart}
+                            disabled={product.stock === 0}
+                            className="flex-1 bg-teal-500 hover:bg-teal-600 disabled:bg-gray-300 text-white font-bold py-3 sm:py-4 rounded-xl transition-all shadow-lg hover:shadow-teal-500/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base min-h-[48px]"
+                        >
+                            <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                            {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                        </button>
+                        <button className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 border-2 border-teal-500 text-teal-600 hover:bg-teal-50 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm sm:text-base min-h-[48px]">
+                            <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
+                            <span className="hidden sm:inline">Wishlist</span>
+                        </button>
                     </div>
-
-                    {/* Features */}
                     <div className="grid grid-cols-2 gap-4 pt-8 border-t border-gray-100">
                         <div className="flex items-start gap-3">
                             <Truck className="w-5 h-5 text-teal-500 mt-1" />
@@ -287,18 +280,19 @@ const ProductDetail = () => {
             </div>
 
             {/* Content Tabs */}
-            <div className="mt-20">
-                <div className="border-b border-gray-200 mb-8">
-                    <div className="flex gap-8 overflow-x-auto">
+            <div className="mt-8 sm:mt-12 md:mt-16">
+                <div className="border-b border-gray-200 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide">
+                    <div className="flex gap-2 sm:gap-4 min-w-max px-1">
                         {['description', 'specifications', 'reviews'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`pb-4 border-b-2 font-bold capitalize transition-colors whitespace-nowrap px-2
-                                    ${activeTab === tab ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-400 hover:text-gray-600'}
-                                `}
+                                className={`pb-3 sm:pb-4 px-3 sm:px-4 font-semibold text-sm sm:text-base transition-all whitespace-nowrap min-h-[44px] flex items-center ${activeTab === tab
+                                        ? 'border-b-2 border-teal-500 text-teal-600'
+                                        : 'text-gray-500 hover:text-gray-700'
+                                    }`}
                             >
-                                {tab}
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
                             </button>
                         ))}
                     </div>
@@ -396,10 +390,10 @@ const ProductDetail = () => {
             />
 
             {/* Related Products */}
-            {relatedProducts.length > 0 && (
-                <div className="mt-16">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {recommendations.length > 0 && (
+                <div className="mt-12 sm:mt-16 md:mt-20">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">You May Also Like</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
                         {relatedProducts.map(rp => (
                             <Link to={`/product/${rp.slug || rp._id}`} key={rp._id} className="group bg-white rounded-xl border border-gray-100 p-4 transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col">
                                 <div className="aspect-square bg-gray-50 rounded-lg mb-4 flex items-center justify-center overflow-hidden">

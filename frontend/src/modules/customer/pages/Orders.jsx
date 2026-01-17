@@ -68,7 +68,7 @@ const Orders = () => {
                     {orders.map((order) => (
                         <div key={order._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                             {/* Order Header */}
-                            <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                            <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
                                 <div className="flex flex-wrap gap-6">
                                     <div>
                                         <p className="text-xs text-gray-500 uppercase font-semibold">Order Placed</p>
@@ -86,7 +86,7 @@ const Orders = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-3 sm:gap-4">
                                     <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusColor(order.status)}`}>
                                         {order.status}
                                     </div>
@@ -100,7 +100,7 @@ const Orders = () => {
                                     <div className="flex-1 space-y-6">
                                         {order.items.map((item, index) => (
                                             <div key={index} className="flex gap-4">
-                                                <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
+                                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
                                                     {item.product && item.product.images && item.product.images[0] ? (
                                                         <img
                                                             src={item.product.images[0]}
@@ -133,10 +133,10 @@ const Orders = () => {
                                     </div>
 
                                     {/* Action Button */}
-                                    <div className="ml-6 flex-shrink-0 self-center">
+                                    <div className="ml-4 sm:ml-6 flex-shrink-0 self-center">
                                         <Link
                                             to={`/orders/${order._id}`}
-                                            className="flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                            className="flex items-center justify-center w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 shadow-sm text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 min-h-[44px]"
                                         >
                                             View Order Details
                                         </Link>

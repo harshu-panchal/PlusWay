@@ -33,15 +33,15 @@ const Profile = () => {
         <div className="mx-4 lg:mx-[10%] py-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-8">My Profile</h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                 {/* User Info Card */}
                 <div className="md:col-span-1">
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <div className="flex flex-col items-center text-center">
-                            <div className="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mb-4">
-                                <span className="text-3xl font-bold">{user.name.charAt(0).toUpperCase()}</span>
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mb-4">
+                                <span className="text-2xl sm:text-3xl font-bold">{user.name.charAt(0).toUpperCase()}</span>
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900">{user.name}</h2>
                             <p className="text-sm text-gray-500 mb-6">{user.role}</p>
 
                             <div className="w-full space-y-4">
@@ -88,10 +88,10 @@ const Profile = () => {
                         ) : recentOrders.length > 0 ? (
                             <div className="space-y-4">
                                 {recentOrders.map(order => (
-                                    <div key={order._id} onClick={() => navigate(`/orders`)} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div key={order._id} onClick={() => navigate(`/orders`)} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border border-gray-100 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors gap-2 sm:gap-0">
                                         <div>
-                                            <p className="font-medium text-gray-900">Order #{order._id.slice(-8).toUpperCase()}</p>
-                                            <p className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()} • ₹{order.totalAmount}</p>
+                                            <p className="font-medium text-gray-900 text-sm sm:text-base">Order #{order._id.slice(-8).toUpperCase()}</p>
+                                            <p className="text-xs sm:text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()} • ₹{order.totalAmount}</p>
                                         </div>
                                         <div className="flex items-center">
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium mr-3 ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' :

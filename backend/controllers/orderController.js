@@ -3,10 +3,16 @@ const crypto = require('crypto');
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+// Initialize Razorpay only if credentials are available
+let razorpay = null;
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+} else {
+    console.warn('⚠️  Razorpay credentials not found. Payment features will be disabled.');
+}
 
 // Create Order (Initialize Payment)
 exports.createOrder = async (req, res) => {
@@ -41,6 +47,13 @@ exports.createOrder = async (req, res) => {
                 quantity: item.quantity,
                 variant: item.variant,
                 price: price
+            });
+        }
+
+        // Check if Razorpay is configured
+        if (!razorpay) {
+            return res.status(503).json({
+                error: 'Payment service is currently unavailable. Please contact support.'
             });
         }
 

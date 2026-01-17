@@ -67,10 +67,10 @@ const HeroCarousel = () => {
         setTimeout(() => setIsAutoPlaying(true), 5000);
     };
 
-    if (loading) return <div className="h-[300px] md:h-[400px] lg:h-[450px] bg-gray-100 rounded-xl animate-pulse"></div>;
+    if (loading) return <div className="h-[200px] sm:h-[300px] md:h-[400px] lg:h-[450px] bg-gray-100 rounded-xl animate-pulse"></div>;
 
     return (
-        <div className="relative w-full h-[300px] md:h-[400px] lg:h-[450px] overflow-hidden rounded-xl shadow-lg group">
+        <div className="relative w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[450px] overflow-hidden rounded-xl shadow-lg group">
             {/* Slides */}
             <div className="relative w-full h-full">
                 {displayBanners.map((banner, index) => (
@@ -92,8 +92,8 @@ const HeroCarousel = () => {
                             />
 
                             {/* Shop Now Button */}
-                            <div className="absolute bottom-8 left-8 md:bottom-12 md:left-16">
-                                <Link to={banner.link || '/products'} className="inline-block bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg">
+                            <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 md:bottom-8 md:left-8 lg:bottom-12 lg:left-16">
+                                <Link to={banner.link || '/products'} className="inline-block bg-white text-gray-900 px-4 py-2 sm:px-6 sm:py-2.5 md:px-8 md:py-3 rounded-lg text-xs sm:text-sm font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg">
                                     Shop Now
                                 </Link>
                             </div>
@@ -107,21 +107,21 @@ const HeroCarousel = () => {
                 <>
                     <button
                         onClick={prevSlide}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 md:p-3 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100 hover:scale-110"
+                        className="absolute left-2 sm:left-3 md:left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100 hover:scale-110 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         aria-label="Previous slide"
                     >
-                        <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+                        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
                     </button>
                     <button
                         onClick={nextSlide}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 md:p-3 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100 hover:scale-110"
+                        className="absolute right-2 sm:right-3 md:right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100 hover:scale-110 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         aria-label="Next slide"
                     >
-                        <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
                     </button>
 
                     {/* Dots Navigation */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                    <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
                         {displayBanners.map((_, index) => (
                             <button
                                 key={index}

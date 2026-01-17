@@ -305,7 +305,7 @@ const Header = () => {
                     </div>
 
                     {/* Right Actions */}
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
                         {/* Phone Number - Desktop */}
                         <div className="hidden xl:flex items-center gap-3 text-slate-700">
                             <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center text-teal-600">
@@ -317,29 +317,28 @@ const Header = () => {
                             </div>
                         </div>
 
-                        {/* Wishlist Link */}
+                        {/* Wishlist Link - Visible on all screens */}
                         <Link
                             to="/wishlist"
-                            className="hidden sm:flex items-center gap-2 p-2 rounded-full hover:bg-red-50 text-slate-700 hover:text-red-500 transition-colors group relative"
+                            className="flex items-center justify-center p-2 rounded-full hover:bg-red-50 text-slate-700 hover:text-red-500 transition-colors group relative min-w-[44px] min-h-[44px]"
                             title="My Wishlist"
                         >
-                            <Heart className="w-6 h-6 group-hover:fill-red-500 transition-colors" />
-                            {/* Optional: Add count badge here if we had it in Redux */}
+                            <Heart className="w-5 h-5 sm:w-6 sm:h-6 group-hover:fill-red-500 transition-colors" />
                         </Link>
 
-                        {/* Cart - Modern Pill Style */}
-                        {/* Using button now to open drawer */}
+                        {/* Cart - Responsive Design */}
                         <button
                             onClick={() => dispatch(openCart())}
-                            className="hidden sm:flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all group"
+                            className="flex items-center gap-2 sm:gap-3 pl-1 sm:pl-2 pr-2 sm:pr-4 py-1.5 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all group min-w-[44px] min-h-[44px]"
                         >
                             <div className="relative p-2">
-                                <ShoppingCart className="w-6 h-6 text-slate-700 group-hover:text-primary-600 transition-colors" />
+                                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-slate-700 group-hover:text-primary-600 transition-colors" />
                                 <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white">
                                     {totalQuantity}
                                 </span>
                             </div>
-                            <div className="flex flex-col items-end">
+                            {/* Cart details - hidden on mobile */}
+                            <div className="hidden sm:flex flex-col items-end">
                                 <span className="text-xs text-slate-400 font-medium">My Cart</span>
                                 <span className="text-sm font-bold text-slate-900">₹{totalAmount}</span>
                             </div>
@@ -355,47 +354,71 @@ const Header = () => {
                     </button>
                 </div>
 
-                {/* Mobile Search Bar - Collapsible */}
+                {/* Mobile Search Bar - Improved */}
                 <div className="md:hidden pb-4">
                     <form onSubmit={handleSearch} className="relative w-full">
                         <input
                             type="text"
-                            placeholder="Search items..."
+                            placeholder="Search accessories..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-4 pr-12 py-3 bg-gray-100 border-none rounded-xl focus:ring-2 focus:ring-primary-100 outline-none"
+                            className="w-full pl-4 pr-12 py-3 bg-gray-100 border-none rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-sm"
                         />
-                        <button type="submit" className="absolute right-2 top-2 bottom-2 px-3 bg-white text-primary-600 rounded-lg shadow-sm flex items-center justify-center">
+                        <button type="submit" className="absolute right-2 top-2 bottom-2 px-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-sm flex items-center justify-center transition-colors min-w-[44px]">
                             <Search className="w-4 h-4" />
                         </button>
                     </form>
                 </div>
             </div>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu - Enhanced */}
             {isMenuOpen && (
                 <div className="lg:hidden border-t border-gray-200 bg-white">
-                    <div className="mx-[10%] py-4">
+                    <div className="mx-4 sm:mx-[10%] py-4">
                         <nav className="flex flex-col space-y-3">
                             {/* Product Catalog Button - Mobile */}
-                            <button className="flex items-center space-x-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 rounded-lg transition-colors">
+                            <Link
+                                to="/products"
+                                className="flex items-center justify-center space-x-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 rounded-lg transition-colors min-h-[48px] font-medium"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
                                 <Menu className="w-5 h-5" />
-                                <span className="font-medium">Product Catalog</span>
-                            </button>
+                                <span>Browse All Products</span>
+                            </Link>
 
-                            {/* Phone Number - Mobile */}
-                            <div className="flex items-center space-x-2 text-gray-700 px-4 py-2">
-                                <Phone className="w-5 h-5 text-teal-500" />
-                                <span className="text-sm font-semibold">+91 98701 62128</span>
+                            {/* Quick Links */}
+                            <div className="grid grid-cols-2 gap-2">
+                                <Link
+                                    to="/wishlist"
+                                    className="flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2.5 rounded-lg transition-colors min-h-[44px] text-sm font-medium"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <Heart className="w-4 h-4" />
+                                    <span>Wishlist</span>
+                                </Link>
+                                <Link
+                                    to="/orders"
+                                    className="flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2.5 rounded-lg transition-colors min-h-[44px] text-sm font-medium"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <Box className="w-4 h-4" />
+                                    <span>Orders</span>
+                                </Link>
                             </div>
 
+                            {/* Phone Number - Mobile */}
+                            <a href="tel:+919870162128" className="flex items-center space-x-2 text-gray-700 px-4 py-3 bg-gray-50 rounded-lg min-h-[48px]">
+                                <Phone className="w-5 h-5 text-teal-500" />
+                                <span className="text-sm font-semibold">+91 98701 62128</span>
+                            </a>
+
                             {/* Top Nav Items */}
-                            <div className="border-t border-gray-200 pt-3 space-y-2">
+                            <div className="border-t border-gray-200 pt-3 space-y-1">
                                 {topNavItems.map((item) => (
                                     <Link
                                         key={item.label}
                                         to={item.href}
-                                        className="block text-gray-600 hover:text-primary-600 transition-colors py-2"
+                                        className="block text-gray-600 hover:text-teal-600 hover:bg-gray-50 transition-colors py-3 px-4 rounded-lg min-h-[44px] text-sm"
                                         onClick={() => setIsMenuOpen(false)}
                                     >
                                         {item.label}
