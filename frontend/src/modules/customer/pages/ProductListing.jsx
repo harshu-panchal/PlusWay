@@ -294,7 +294,7 @@ const ProductListing = () => {
                 {/* Product Grid */}
                 <div className="flex-1 min-h-[500px]">
                     {loading || loadingProducts ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-pulse">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 animate-pulse">
                             {[1, 2, 3, 4, 5, 6].map(i => (
                                 <div key={i} className="bg-gray-100 rounded-xl aspect-[3/4]"></div>
                             ))}
@@ -307,7 +307,7 @@ const ProductListing = () => {
                             <button onClick={clearFilters} className="mt-4 text-teal-600 font-medium hover:underline">Clear all filters</button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5 md:gap-6">
                             {products.map((product) => (
                                 <ProductCard key={product._id} product={product} />
                             ))}
