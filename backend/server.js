@@ -17,6 +17,10 @@ const allowedOrigins = [
     process.env.FRONTEND_URL
 ].filter(Boolean); // Remove undefined values
 
+console.log('🔒 CORS Configuration:');
+console.log('   Allowed Origins:', allowedOrigins);
+console.log('   FRONTEND_URL:', process.env.FRONTEND_URL);
+
 app.use(cors({
     origin: allowedOrigins,
     credentials: true
