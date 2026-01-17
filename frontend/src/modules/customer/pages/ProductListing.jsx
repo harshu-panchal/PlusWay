@@ -114,6 +114,16 @@ const ProductListing = () => {
 
     const activeCategory = categories.find(c => c.slug === slug);
 
+    const pageTitle = useMemo(() => {
+        if (searchQuery) return `Search Results for "${searchQuery}"`;
+        if (isFeaturedParam === 'true') return 'Featured Products';
+        if (isNewArrivalParam === 'true') return 'New Arrivals';
+        if (activeCategory) return activeCategory.name;
+        return 'All Products';
+    }, [searchQuery, isFeaturedParam, isNewArrivalParam, activeCategory]);
+
+    const { page: currentPage, pages: totalPages } = pagination;
+
     // Build currentPath from URL params for nested URL construction
     // e.g., if we're at /schutzglas/fuer-iphone-550, currentPath = "/schutzglas/fuer-iphone-550"
     const currentPath = useMemo(() => {
@@ -319,8 +329,8 @@ const ProductListing = () => {
                                         key={i}
                                         onClick={() => handlePageChange(i + 1)}
                                         className={`px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm min-w-[44px] min-h-[44px] flex items-center justify-center ${currentPage === i + 1
-                                                ? 'bg-teal-500 text-white'
-                                                : 'border border-gray-200 hover:bg-gray-50'
+                                            ? 'bg-teal-500 text-white'
+                                            : 'border border-gray-200 hover:bg-gray-50'
                                             }`}
                                     >
                                         {i + 1}
