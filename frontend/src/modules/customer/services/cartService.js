@@ -48,17 +48,14 @@ export const cartService = {
             quantity,
             variant
         };
-        quantity,
-            variant
-    };
-    const response = await fetch(`${API_URL}/cart/add`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(body)
-    });
-    if(!response.ok) throw new Error('Failed to add to cart');
-    return await response.json();
-},
+        const response = await fetch(`${API_URL}/cart/add`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) throw new Error('Failed to add to cart');
+        return await response.json();
+    },
 
     updateItem: async (itemId, quantity) => {
         const body = {
@@ -66,42 +63,37 @@ export const cartService = {
             itemId,
             quantity
         };
-        quantity
-    };
-const response = await fetch(`${API_URL}/cart/update`, {
-    method: 'PUT',
-    headers: getHeaders(),
-    body: JSON.stringify(body)
-});
-if (!response.ok) throw new Error('Failed to update cart item');
-return await response.json();
+        const response = await fetch(`${API_URL}/cart/update`, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) throw new Error('Failed to update cart item');
+        return await response.json();
     },
 
-removeItem: async (itemId) => {
-    const body = {
-        ...getIdentifyParams(),
-        itemId
-    };
-    itemId
-};
-const response = await fetch(`${API_URL}/cart/remove`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(body)
-});
-if (!response.ok) throw new Error('Failed to remove cart item');
-return await response.json();
+    removeItem: async (itemId) => {
+        const body = {
+            ...getIdentifyParams(),
+            itemId
+        };
+        const response = await fetch(`${API_URL}/cart/remove`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) throw new Error('Failed to remove cart item');
+        return await response.json();
     },
 
-clearCart: async () => {
-    const body = { ...getIdentifyParams() };
-    const body = { ...getIdentifyParams() };
-    const response = await fetch(`${API_URL}/cart/clear`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(body)
-    });
-    if (!response.ok) throw new Error('Failed to clear cart');
-    return await response.json();
-}
+    clearCart: async () => {
+        const body = { ...getIdentifyParams() };
+        const response = await fetch(`${API_URL}/cart/clear`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) throw new Error('Failed to clear cart');
+        return await response.json();
+    }
 };
