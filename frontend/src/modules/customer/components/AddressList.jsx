@@ -14,8 +14,9 @@ const AddressList = () => {
 
     const fetchAddresses = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/addresses', {
-                withCredentials: true
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/addresses`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             setAddresses(res.data);
             setError(null);
@@ -47,8 +48,9 @@ const AddressList = () => {
         if (!window.confirm('Are you sure you want to delete this address?')) return;
 
         try {
-            await axios.delete(`http://localhost:5000/api/addresses/${id}`, {
-                withCredentials: true
+            const token = localStorage.getItem('token');
+            await axios.delete(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/addresses/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
             fetchAddresses();
         } catch (error) {
@@ -61,14 +63,14 @@ const AddressList = () => {
         setSubmitting(true);
         setError(null);
         try {
+            const token = localStorage.getItem('token');
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
             if (editingAddress) {
-                await axios.put(`http://localhost:5000/api/addresses/${editingAddress._id}`, values, {
-                    withCredentials: true
-                });
+                await axios.put(`${baseUrl}/addresses/${editingAddress._id}`, values, config);
             } else {
-                await axios.post('http://localhost:5000/api/addresses', values, {
-                    withCredentials: true
-                });
+                await axios.post(`${baseUrl}/addresses`, values, config);
             }
             setModalOpen(false);
             fetchAddresses();
