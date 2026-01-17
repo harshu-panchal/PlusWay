@@ -217,7 +217,7 @@ const FeaturedManagement = () => {
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
                                                     {product.images?.[0] ? (
-                                                        <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                                                        <img src={product.images[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
                                                     ) : (
                                                         <Package className="w-full h-full p-2 text-slate-400" />
                                                     )}

@@ -86,6 +86,7 @@ const Home = () => {
                                         src={sideBanner?.image || "https://images.unsplash.com/photo-1616410011236-7a4211f90103?w=800&h=600&fit=crop"}
                                         alt={sideBanner?.title || "PlusWay Premium"}
                                         className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                                        loading="lazy"
                                     />
 
                                     {/* Content Overlay */}
@@ -224,6 +225,7 @@ const Home = () => {
                                             src={banner.image}
                                             alt={banner.title}
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                            loading="lazy"
                                         />
                                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
                                     </div>

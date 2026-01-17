@@ -70,6 +70,7 @@ const Wishlist = () => {
                                     src={product.mainImage}
                                     alt={product.title}
                                     className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                                    loading="lazy"
                                 />
                                 <button
                                     onClick={() => removeFromWishlist(product._id)}

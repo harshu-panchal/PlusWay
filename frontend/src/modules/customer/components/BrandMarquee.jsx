@@ -57,6 +57,7 @@ const BrandMarquee = () => {
                                                 src={brand.logo}
                                                 alt={brand.name}
                                                 className="w-full h-full object-contain transition-all duration-300"
+                                                loading="lazy"
                                             />
                                         </div>
                                         <span className="text-xs sm:text-sm font-medium text-slate-500 group-hover:text-teal-600 transition-colors">

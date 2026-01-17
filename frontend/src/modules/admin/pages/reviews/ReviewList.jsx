@@ -91,7 +91,7 @@ const ReviewList = () => {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 {review.product?.mainImage && (
-                                                    <img src={review.product.mainImage} alt="" className="w-10 h-10 rounded-md object-cover border" />
+                                                    <img src={review.product.mainImage} alt="" className="w-10 h-10 rounded-md object-cover border" loading="lazy" />
                                                 )}
                                                 <span className="font-medium text-slate-700 max-w-[200px] truncate block" title={review.product?.title}>
                                                     {review.product?.title || 'Unknown Product'}

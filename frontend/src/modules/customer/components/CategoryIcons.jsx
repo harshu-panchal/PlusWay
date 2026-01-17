@@ -61,6 +61,7 @@ const CategoryIcons = () => {
                                     src={category.icon}
                                     alt={category.name}
                                     className="w-16 h-16 object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
+                                    loading="lazy"
                                 />
                             ) : (
                                 <Layers className="w-10 h-10 text-slate-300 group-hover:text-teal-500 transition-colors" />

@@ -90,6 +90,7 @@ const CartDrawer = () => {
                                                                             src={item.product?.mainImage}
                                                                             alt={item.product?.title}
                                                                             className="h-full w-full object-contain object-center"
+                                                                            loading="lazy"
                                                                         />
                                                                     </div>
 

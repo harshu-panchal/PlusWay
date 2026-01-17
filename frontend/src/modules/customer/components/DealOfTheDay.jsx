@@ -107,6 +107,7 @@ const DealOfTheDay = () => {
                                 src={img}
                                 alt={`View ${index + 1}`}
                                 className="w-full h-full object-contain p-2"
+                                loading="lazy"
                             />
                         </div>
                     ))}
@@ -117,6 +118,7 @@ const DealOfTheDay = () => {
                                 src={deal.images[2]}
                                 alt="View 3"
                                 className="w-full h-full object-contain p-2"
+                                loading="lazy"
                             />
                         </div>
                     )}

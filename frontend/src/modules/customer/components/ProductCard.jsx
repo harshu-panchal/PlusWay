@@ -91,6 +91,7 @@ const ProductCard = ({ product }) => {
                         src={mainImage}
                         alt={title}
                         className="absolute inset-0 w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
                     />
                 )}
             </div>

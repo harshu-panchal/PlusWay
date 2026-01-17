@@ -153,6 +153,7 @@ const BrandList = () => {
                                                         src={brand.logo}
                                                         alt={brand.name}
                                                         className="max-w-full max-h-full object-contain"
+                                                        loading="lazy"
                                                     />
                                                 ) : (
                                                     <div className="w-8 h-8 rounded-full bg-slate-100" />

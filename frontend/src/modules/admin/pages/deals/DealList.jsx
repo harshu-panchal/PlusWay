@@ -90,7 +90,7 @@ const DealList = () => {
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                                <img src={deal.images[0]} alt="" className="w-full h-full object-cover" />
+                                                <img src={deal.images[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
                                             </div>
                                             <div>
                                                 <div className="font-medium text-gray-900 line-clamp-1">{deal.title}</div>

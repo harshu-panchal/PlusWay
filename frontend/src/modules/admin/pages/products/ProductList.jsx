@@ -252,7 +252,7 @@ const ProductList = () => {
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:shadow-sm transition-all overflow-hidden border border-slate-100">
                                                     {product.images?.[0] ? (
-                                                        <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                                                        <img src={product.images[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
                                                     ) : (
                                                         <Package className="w-6 h-6" />
                                                     )}

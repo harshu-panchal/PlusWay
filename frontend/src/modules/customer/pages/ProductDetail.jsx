@@ -150,7 +150,7 @@ const ProductDetail = () => {
                 <div className="space-y-3 sm:space-y-4">
                     <div className="aspect-square bg-white rounded-xl sm:rounded-2xl border border-gray-100 flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-hidden relative group">
                         {galleryImages.length > 0 ? (
-                            <img src={galleryImages[activeImage]} alt={product.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+                            <img src={galleryImages[activeImage]} alt={product.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                         ) : (
                             <div className="text-gray-300">No Image Available</div>
                         )}
@@ -175,7 +175,7 @@ const ProductDetail = () => {
                                     onClick={() => setActiveImage(idx)}
                                     className={`w-16 h-16 sm:w-20 sm:h-20 rounded-lg border-2 flex-shrink-0 bg-white p-1.5 sm:p-2 transition-all min-w-[64px] ${activeImage === idx ? 'border-teal-500 ring-2 ring-teal-500/20' : 'border-transparent hover:border-gray-200'}`}
                                 >
-                                    <img src={img} alt="" className="w-full h-full object-contain" />
+                                    <img src={img} alt="" className="w-full h-full object-contain" loading="lazy" />
                                 </button>
                             ))}
                         </div>
@@ -234,8 +234,8 @@ const ProductDetail = () => {
                                         key={variant._id}
                                         onClick={() => setSelectedVariant(variant._id)}
                                         className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 transition-all text-xs sm:text-sm font-medium min-h-[44px] ${selectedVariant === variant._id
-                                                ? 'border-teal-500 bg-teal-50 text-teal-700'
-                                                : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                                            ? 'border-teal-500 bg-teal-50 text-teal-700'
+                                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
                                             }`}
                                     >
                                         {variant.name}
@@ -288,8 +288,8 @@ const ProductDetail = () => {
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`pb-3 sm:pb-4 px-3 sm:px-4 font-semibold text-sm sm:text-base transition-all whitespace-nowrap min-h-[44px] flex items-center ${activeTab === tab
-                                        ? 'border-b-2 border-teal-500 text-teal-600'
-                                        : 'text-gray-500 hover:text-gray-700'
+                                    ? 'border-b-2 border-teal-500 text-teal-600'
+                                    : 'text-gray-500 hover:text-gray-700'
                                     }`}
                             >
                                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -398,7 +398,7 @@ const ProductDetail = () => {
                             <Link to={`/product/${rp.slug || rp._id}`} key={rp._id} className="group bg-white rounded-xl border border-gray-100 p-4 transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col">
                                 <div className="aspect-square bg-gray-50 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
                                     {rp.mainImage ? (
-                                        <img src={rp.mainImage} alt={rp.title} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
+                                        <img src={rp.mainImage} alt={rp.title} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-303" loading="lazy" />
                                     ) : (
                                         <div className="text-gray-300 text-xs">No Image</div>
                                     )}

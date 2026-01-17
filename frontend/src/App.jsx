@@ -1,13 +1,15 @@
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import CustomerRoutes from './modules/customer/routes';
-import AdminRoutes from './modules/admin/routes';
-import DeliveryRoutes from './modules/delivery/routes';
-
-import { useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { useEffect, Suspense, lazy } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchWishlist } from './modules/customer/store/slices/wishlistSlice';
 import { fetchCart } from './modules/customer/store/slices/cartSlice';
 import { checkAuth } from './store/authSlice';
+import Loader from './shared/components/ui/Loader';
+
+// Lazy load modules
+const CustomerRoutes = lazy(() => import('./modules/customer/routes'));
+const AdminRoutes = lazy(() => import('./modules/admin/routes'));
+const DeliveryRoutes = lazy(() => import('./modules/delivery/routes'));
 
 function App() {
   const dispatch = useDispatch();
@@ -29,16 +31,18 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Routes>
-        {/* Customer Routes - Base path / */}
-        <Route path="/*" element={<CustomerRoutes />} />
+      <Suspense fallback={<Loader fullScreen />}>
+        <Routes>
+          {/* Customer Routes - Base path / */}
+          <Route path="/*" element={<CustomerRoutes />} />
 
-        {/* Admin Routes - Base path /admin */}
-        <Route path="/admin/*" element={<AdminRoutes />} />
+          {/* Admin Routes - Base path /admin */}
+          <Route path="/admin/*" element={<AdminRoutes />} />
 
-        {/* Delivery Routes - Base path /delivery */}
-        <Route path="/delivery/*" element={<DeliveryRoutes />} />
-      </Routes>
+          {/* Delivery Routes - Base path /delivery */}
+          <Route path="/delivery/*" element={<DeliveryRoutes />} />
+        </Routes>
+      </Suspense>
     </div>
   );
 }

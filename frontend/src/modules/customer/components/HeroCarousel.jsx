@@ -89,6 +89,7 @@ const HeroCarousel = () => {
                                 src={banner.image}
                                 alt={banner.title || 'Banner'}
                                 className="w-full h-full object-cover"
+                                loading={index === 0 ? "eager" : "lazy"}
                             />
 
                             {/* Shop Now Button */}

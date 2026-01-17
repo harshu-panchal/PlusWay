@@ -213,6 +213,7 @@ const CategoryList = () => {
                                                             src={category.icon}
                                                             alt={category.name}
                                                             className="w-4 h-4 object-cover rounded"
+                                                            loading="lazy"
                                                         />
                                                     ) : (
                                                         <FolderTree className="w-4 h-4" />

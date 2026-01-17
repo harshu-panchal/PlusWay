@@ -83,7 +83,7 @@ const OrderDetail = () => {
                                 <div key={index} className="p-6 flex items-start gap-4">
                                     <div className="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
                                         {item.product?.images?.[0] ? (
-                                            <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover" />
+                                            <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover" loading="lazy" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-gray-400">No Img</div>
                                         )}

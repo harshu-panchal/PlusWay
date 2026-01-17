@@ -65,7 +65,7 @@ const BannerList = () => {
                                 <tr key={banner._id} className="border-b border-gray-50 hover:bg-gray-50">
                                     <td className="py-3 px-4">
                                         <div className="w-24 h-16 bg-gray-100 rounded overflow-hidden">
-                                            <img src={banner.image} alt="" className="w-full h-full object-cover" />
+                                            <img src={banner.image} alt="" className="w-full h-full object-cover" loading="lazy" />
                                         </div>
                                     </td>
                                     <td className="py-3 px-4">
