@@ -55,12 +55,17 @@ exports.createOrder = async (req, res) => {
             const price = item.variant?.price || item.product.discountPrice || item.product.basePrice;
             totalAmount += price * item.quantity;
 
-            orderItems.push({
+            const orderItem = {
                 product: item.product._id,
                 quantity: item.quantity,
-                variant: item.variant || undefined, // Handle null variant explicitly
                 price: price
-            });
+            };
+
+            if (item.variant) {
+                orderItem.variant = item.variant;
+            }
+
+            orderItems.push(orderItem);
         }
 
         // Check if Razorpay is configured
