@@ -44,7 +44,17 @@ mongoose.connect(MONGO_URI)
         console.error('❌ Database Connection Error:', err);
     });
 
-// Routes Placeholder
+// Health Check Endpoint for Render
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
+// Root Route
 app.get('/', (req, res) => {
     res.send('PlusWay Backend API is Running');
 });
@@ -81,3 +91,28 @@ app.use('/api/finance', financialRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/deals', require('./routes/dealRoutes'));
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error('❌ Error:', err);
+    res.status(err.status || 500).json({
+        message: err.message || 'Internal Server Error',
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+});
+
+// Graceful Shutdown
+const gracefulShutdown = async () => {
+    console.log('\n🛑 Received shutdown signal, closing server gracefully...');
+    try {
+        await mongoose.connection.close();
+        console.log('✅ MongoDB connection closed.');
+        process.exit(0);
+    } catch (error) {
+        console.error('❌ Error during shutdown:', error);
+        process.exit(1);
+    }
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
