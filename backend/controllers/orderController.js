@@ -49,20 +49,35 @@ exports.createOrder = async (req, res) => {
         const orderItems = [];
 
         for (const item of cart.items) {
-            if (!item.product) continue; // Skip if product deleted
+            if (!item.product) continue;
 
+            // Use toObject to get clean data and avoid Mongoose-specific issues
+            const itemObj = item.toObject();
+            
             // Prioritize variant price, then discount price, then base price
-            const price = item.variant?.price || item.product.discountPrice || item.product.basePrice;
-            totalAmount += price * item.quantity;
+            const price = itemObj.variant?.price || itemObj.product?.discountPrice || itemObj.product?.basePrice;
+            
+            if (price === undefined || price === null) {
+                console.error(`⚠️ Price not found for product: ${itemObj.product?._id}`);
+                continue; 
+            }
+
+            totalAmount += price * itemObj.quantity;
 
             const orderItem = {
-                product: item.product._id,
-                quantity: item.quantity,
+                product: itemObj.product._id,
+                quantity: itemObj.quantity,
                 price: price
             };
 
-            if (item.variant) {
-                orderItem.variant = item.variant;
+            // Only add variant if it's a valid object with at least one property
+            if (itemObj.variant && typeof itemObj.variant === 'object' && Object.keys(itemObj.variant).length > 0) {
+                // Ensure no null values are passed for the variant object itself
+                orderItem.variant = {
+                    sku: itemObj.variant.sku || undefined,
+                    name: itemObj.variant.name || undefined,
+                    price: itemObj.variant.price || undefined
+                };
             }
 
             orderItems.push(orderItem);

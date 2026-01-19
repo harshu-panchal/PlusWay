@@ -1,19 +1,20 @@
-import { Routes, Route } from 'react-router-dom';
-import { useEffect, Suspense, lazy } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchWishlist } from './modules/customer/store/slices/wishlistSlice';
-import { fetchCart } from './modules/customer/store/slices/cartSlice';
-import { checkAuth } from './store/authSlice';
-import Loader from './shared/components/ui/Loader';
+import { Routes, Route } from "react-router-dom";
+import { useEffect, Suspense, lazy } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchWishlist } from "./modules/customer/store/slices/wishlistSlice";
+import { fetchCart } from "./modules/customer/store/slices/cartSlice";
+import { checkAuth } from "./store/authSlice";
+import Loader from "./shared/components/ui/Loader";
+import ScrollToTop from "./shared/components/ScrollToTop";
 
 // Lazy load modules
-const CustomerRoutes = lazy(() => import('./modules/customer/routes'));
-const AdminRoutes = lazy(() => import('./modules/admin/routes'));
-const DeliveryRoutes = lazy(() => import('./modules/delivery/routes'));
+const CustomerRoutes = lazy(() => import("./modules/customer/routes"));
+const AdminRoutes = lazy(() => import("./modules/admin/routes"));
+const DeliveryRoutes = lazy(() => import("./modules/delivery/routes"));
 
 function App() {
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector(state => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(checkAuth());
@@ -31,6 +32,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ScrollToTop />
       <Suspense fallback={<Loader fullScreen />}>
         <Routes>
           {/* Customer Routes - Base path / */}

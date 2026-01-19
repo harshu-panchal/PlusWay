@@ -21,7 +21,8 @@ const orderSchema = new mongoose.Schema({
         variant: {
             sku: String,
             name: String,
-            price: Number
+            price: Number,
+            _id: false
         },
         price: { // Store the price at time of purchase
             type: Number,
