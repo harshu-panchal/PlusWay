@@ -5,6 +5,10 @@ require('dotenv').config();
 
 const app = express();
 
+// Trust proxy - Required for Render and other reverse proxies
+// This allows Express to trust the X-Forwarded-* headers
+app.set('trust proxy', 1);
+
 // Security Middleware (Rate Limit, Helmet, Sanitize, XSS)
 const setupSecurity = require('./middleware/security');
 setupSecurity(app);
