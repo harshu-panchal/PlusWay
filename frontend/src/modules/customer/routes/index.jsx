@@ -34,23 +34,23 @@ const CustomerRoutes = () => {
                 <Route element={<CustomerLayout />}>
                     <Route path="/" element={<Home />} />
                     <Route path="/products" element={<ProductListing />} />
-                    <Route path="/:category" element={<ProductListing />} />
-                    <Route path="/:category/:subcategory" element={<ProductListing />} />
-                    <Route path="/:category/:subcategory/:subsubcategory" element={<ProductListing />} />
-
                     <Route path="/product/:slug" element={<ProductDetail />} />
 
-                    {/* Protected Routes */}
-                    <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
+                    {/* Protected Routes - Accessible by Customers and Admins for testing */}
+                    <Route element={<ProtectedRoute allowedRoles={['customer', 'admin']} />}>
                         <Route path="/cart" element={<Cart />} />
                         <Route path="/checkout" element={<Checkout />} />
                         <Route path="/order-success" element={<OrderSuccess />} />
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/orders/:id" element={<OrderDetail />} />
-                        <Route path="/orders/:id" element={<OrderDetail />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/wishlist" element={<Wishlist />} />
                     </Route>
+
+                    {/* Dynamic Category Routes - Last for lowest priority */}
+                    <Route path="/:category" element={<ProductListing />} />
+                    <Route path="/:category/:subcategory" element={<ProductListing />} />
+                    <Route path="/:category/:subcategory/:subsubcategory" element={<ProductListing />} />
                 </Route>
 
                 {/* Catch all - redirect to home */}

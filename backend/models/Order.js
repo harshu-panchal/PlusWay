@@ -43,9 +43,8 @@ const orderSchema = new mongoose.Schema({
         country: { type: String, default: 'India' }
     },
     paymentDetails: {
-        razorpay_order_id: String,
-        razorpay_payment_id: String,
-        razorpay_signature: String
+        paypal_order_id: String,
+        paypal_capture_id: String
     },
     deliveryBoy: {
         type: mongoose.Schema.Types.ObjectId,

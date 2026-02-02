@@ -59,6 +59,15 @@ const productSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Text index for search
-productSchema.index({ title: 'text', description: 'text' });
+productSchema.index({ title: 'text', description: 'text' }, { weights: { title: 10, description: 1 } });
+productSchema.index({ category: 1 });
+productSchema.index({ rootCategory: 1 });
+productSchema.index({ status: 1 });
+productSchema.index({ isBestSeller: 1 });
+productSchema.index({ isNewArrival: 1 });
+productSchema.index({ isFeatured: 1 });
+productSchema.index({ basePrice: 1 });
+productSchema.index({ createdAt: -1 });
+productSchema.index({ slug: 1 });
 
 module.exports = mongoose.model('Product', productSchema);

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import HeroCarousel from '../components/HeroCarousel';
 import CategoryIcons from '../components/CategoryIcons';
 import ProductCard from '../components/ProductCard';
@@ -20,37 +21,38 @@ const Home = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch Banners
-                const sideRes = await fetch(`${API_URL}/banners?position=side`);
+                // Fetch all data in parallel
+                const [sideRes, gridRes, prodRes, newRes] = await Promise.all([
+                    fetch(`${API_URL}/banners?position=side`),
+                    fetch(`${API_URL}/banners?position=bottom-grid`),
+                    fetch(`${API_URL}/products?limit=8&isFeatured=true`),
+                    fetch(`${API_URL}/products?limit=8&isNewArrival=true&sort=newest`)
+                ]);
+
                 if (sideRes.ok) {
                     const data = await sideRes.json();
-                    if (data.length > 0) setSideBanner(data[0]);
+                    if (data && data.length > 0) setSideBanner(data[0]);
                 }
 
-                const gridRes = await fetch(`${API_URL}/banners?position=bottom-grid`);
                 if (gridRes.ok) {
                     const data = await gridRes.json();
                     setPromoBanners(data);
                 }
 
-                // Fetch Featured Products (Manually Selected)
-                const prodRes = await fetch(`${API_URL}/products?limit=8&isFeatured=true`);
                 if (prodRes.ok) {
                     const data = await prodRes.json();
                     setBestSellers({ data: data.products || [], loading: false });
                 }
 
-                // Fetch New Arrivals (Manually Selected)
-                const newRes = await fetch(`${API_URL}/products?limit=8&isNewArrival=true&sort=newest`);
                 if (newRes.ok) {
                     const data = await newRes.json();
                     setNewArrivals({ data: data.products || [], loading: false });
                 }
 
             } catch (error) {
-                console.error(error);
-                setBestSellers({ data: [], loading: false });
-                setNewArrivals({ data: [], loading: false });
+                console.error("Home page data fetch error:", error);
+                setBestSellers(prev => ({ ...prev, loading: false }));
+                setNewArrivals(prev => ({ ...prev, loading: false }));
             }
         };
         fetchData();
@@ -68,54 +70,39 @@ const Home = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen">
-            {/* 1. Hero Carousel Section */}
-            <section className="pt-4 sm:pt-6 pb-2">
-                <div className="mx-4 lg:mx-[10%]">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-                        {/* Main Carousel - 75% width on desktop */}
+            {/* 1. Hero Section */}
+            <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="pt-2 sm:pt-6"
+            >
+                <div className="container mx-auto px-4 lg:px-[10%]">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                         <div className="lg:col-span-8 xl:col-span-9">
                             <HeroCarousel />
                         </div>
-
-                        {/* Side Banner - 25% width on desktop, show on tablet */}
-                        <div className="lg:col-span-4 xl:col-span-3 hidden md:block">
-                            <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-sm group cursor-pointer border border-gray-100">
-                                <div className="absolute inset-0 bg-slate-900">
-                                    {/* Background Image */}
-                                    <img
-                                        src={sideBanner?.image || "https://images.unsplash.com/photo-1616410011236-7a4211f90103?w=800&h=600&fit=crop"}
-                                        alt={sideBanner?.title || "PlusWay Premium"}
-                                        className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
-                                        loading="lazy"
-                                    />
-
-                                    {/* Content Overlay */}
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-white z-10">
-                                        <div className="mb-4">
-                                            <h2 className="text-3xl font-bold tracking-tight mb-2 leading-tight">{sideBanner?.title || 'Premium\nAudio'}</h2>
-                                            <div className="h-1 w-12 bg-teal-500 rounded-full mx-auto"></div>
-                                        </div>
-
-                                        <p className="text-sm text-slate-200 mb-6 max-w-[80%] leading-relaxed">{sideBanner?.subtitle || 'Experience sound like never before.'}</p>
-
-                                        <Link to={sideBanner?.link || '/products'} className="px-6 py-2.5 bg-white text-slate-900 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-teal-500 hover:text-white transition-all duration-300 shadow-lg">
-                                            Shop Now
-                                        </Link>
-                                    </div>
+                        <div className="lg:col-span-4 xl:col-span-3 hidden lg:block">
+                            <div className="h-full rounded-[32px] overflow-hidden relative group shadow-premium">
+                                <img src={sideBanner?.image || "https://images.unsplash.com/photo-1616410011236-7a4211f90103?auto=format&fit=crop&q=80"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Promo" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent p-8 flex flex-col justify-end">
+                                    <h3 className="text-white text-2xl font-black leading-tight mb-2 tracking-tight whitespace-pre-line">{sideBanner?.title || 'Premium\nAudio'}</h3>
+                                    <p className="text-slate-300 text-xs mb-6 font-medium">{sideBanner?.subtitle || 'Limited time offer'}</p>
+                                    <Link to="/products" className="bg-white text-slate-900 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-center hover:bg-teal-500 hover:text-white transition-all shadow-xl">Shop Now</Link>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </motion.section>
 
-            {/* 2. Features Strip (Trust Signals) - Moved UP */}
-            <section className="py-4 sm:py-6">
-                <div className="mx-4 lg:mx-[10%]">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                        <FeatureItem icon="🚚" title="Free Shipping" desc="On all orders over ₹499" />
-                        <FeatureItem icon="🛡️" title="Secure Payment" desc="100% protected transactions" />
-                        <FeatureItem icon="↩️" title="Easy Returns" desc="30-day money back guarantee" />
+            {/* 2. Trust Signals */}
+            <section className="py-8">
+                <div className="container mx-auto px-4 lg:px-[10%]">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <FeatureItem icon="🚚" title="Fast Shipping" desc="Express delivery across India" />
+                        <FeatureItem icon="🛡️" title="Verified Store" desc="100% Genuine products" />
+                        <FeatureItem icon="↩️" title="Easy Returns" desc="7-day hassle-free returns" />
                     </div>
                 </div>
             </section>

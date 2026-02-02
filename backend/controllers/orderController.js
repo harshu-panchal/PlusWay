@@ -1,20 +1,9 @@
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
+const paypal = require('../services/paypalService');
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
+const Transaction = require('../models/Transaction');
 
-// Initialize Razorpay only if credentials are available
-let razorpay = null;
-if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-    razorpay = new Razorpay({
-        key_id: process.env.RAZORPAY_KEY_ID,
-        key_secret: process.env.RAZORPAY_KEY_SECRET
-    });
-} else {
-    console.warn('⚠️  Razorpay credentials not found. Payment features will be disabled.');
-}
-
-// Create Order (Initialize Payment)
+// Create Order (Initialize PayPal Payment)
 exports.createOrder = async (req, res) => {
     try {
         const { shippingAddress, guestId } = req.body;
@@ -24,17 +13,14 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ error: 'User identification required' });
         }
 
-        // Fetch Cart - Smart Lookup
-        // 1. Try finding by User ID first
+        // Fetch Cart
         let cart = null;
         if (userId) {
             cart = await Cart.findOne({ user: userId }).populate('items.product');
         }
 
-        // 2. If user cart is empty or null, try Guest ID
         if ((!cart || cart.items.length === 0) && guestId) {
             const guestCart = await Cart.findOne({ guestId }).populate('items.product');
-            // If guest cart exists and has items, use it
             if (guestCart && guestCart.items.length > 0) {
                 cart = guestCart;
             }
@@ -44,178 +30,116 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ error: 'Cart is empty' });
         }
 
-        // Calculate Total (Secure calculation on backend)
+        // Calculate Total
         let totalAmount = 0;
         const orderItems = [];
 
         for (const item of cart.items) {
             if (!item.product) continue;
-
-            // Use toObject to get clean data and avoid Mongoose-specific issues
             const itemObj = item.toObject();
-            
-            // Prioritize variant price, then discount price, then base price
             const price = itemObj.variant?.price || itemObj.product?.discountPrice || itemObj.product?.basePrice;
-            
-            if (price === undefined || price === null) {
-                console.error(`⚠️ Price not found for product: ${itemObj.product?._id}`);
-                continue; 
-            }
+
+            if (price === undefined || price === null) continue;
 
             totalAmount += price * itemObj.quantity;
-
-            const orderItem = {
+            orderItems.push({
                 product: itemObj.product._id,
                 quantity: itemObj.quantity,
-                price: price
-            };
-
-            // Only add variant if it's a valid object with at least one property
-            if (itemObj.variant && typeof itemObj.variant === 'object' && Object.keys(itemObj.variant).length > 0) {
-                // Ensure no null values are passed for the variant object itself
-                orderItem.variant = {
-                    sku: itemObj.variant.sku || undefined,
-                    name: itemObj.variant.name || undefined,
-                    price: itemObj.variant.price || undefined
-                };
-            }
-
-            orderItems.push(orderItem);
+                price: price,
+                variant: itemObj.variant ? {
+                    sku: itemObj.variant.sku,
+                    name: itemObj.variant.name,
+                    price: itemObj.variant.price
+                } : undefined
+            });
         }
 
         if (totalAmount <= 0) {
             return res.status(400).json({ error: 'Order total cannot be zero.' });
         }
 
-        // Check if Razorpay is configured
-        if (!razorpay) {
-            console.error('Razorpay not initialized');
-            return res.status(503).json({
-                error: 'Payment service is currently unavailable. Please contact support.'
-            });
-        }
+        // Create PayPal Order
+        // For testing, we might want to convert INR to USD if sandbox doesn't support INR well,
+        // but PayPal supports many currencies. Let's stick to the requested currency if possible,
+        // or default to USD for sandbox testing if needed. 
+        // NOTE: Indian PayPal accounts have restrictions on domestic INR payments.
+        // If the user is in India, they might need to use USD for sandbox testing.
+        const paypalOrder = await paypal.createOrder({
+            amount: totalAmount,
+            currency: "USD" // Common for international testing, change to "INR" if account supports it
+        });
 
-        // Razorpay Order Options
-        const options = {
-            amount: Math.round(totalAmount * 100), // Amount in paise, rounded to integer
-            currency: 'INR',
-            receipt: `receipt_${Date.now()}`
-        };
+        const newOrder = new Order({
+            user: userId || undefined,
+            guestId: userId ? undefined : guestId,
+            items: orderItems,
+            totalAmount,
+            shippingAddress,
+            paymentDetails: {
+                paypal_order_id: paypalOrder.id
+            },
+            paymentStatus: 'Pending'
+        });
 
-        let razorpayOrder;
-        try {
-            console.log('Creating Razorpay order with options:', options);
-            razorpayOrder = await razorpay.orders.create(options);
-        } catch (rpError) {
-            console.error('Razorpay Order Creation Error:', rpError);
-            return res.status(502).json({ error: `Payment Gateway Error: ${rpError.message}` });
-        }
+        await newOrder.save();
 
-        if (!razorpayOrder) {
-            return res.status(500).json({ error: 'Failed to create Razorpay order (No response)' });
-        }
-
-        // Create DB Order with Pending status
-        try {
-            const newOrder = new Order({
-                user: userId || undefined,
-                guestId: userId ? undefined : guestId,
-                items: orderItems,
-                totalAmount,
-                shippingAddress,
-                paymentDetails: {
-                    razorpay_order_id: razorpayOrder.id
-                },
-                paymentStatus: 'Pending'
-            });
-
-            await newOrder.save();
-
-            res.status(201).json({
-                id: newOrder._id,
-                razorpayOrderId: razorpayOrder.id,
-                amount: totalAmount,
-                currency: 'INR',
-                keyIdx: process.env.RAZORPAY_KEY_ID
-            });
-        } catch (dbError) {
-            console.error('Database Order Save Error:', dbError);
-            // Return more specific validation error if possible
-            if (dbError.name === 'ValidationError') {
-                return res.status(400).json({ error: `Validation Error: ${dbError.message}` });
-            }
-            return res.status(500).json({ error: `Database Error: ${dbError.message}` });
-        }
+        res.status(201).json({
+            id: newOrder._id,
+            paypalOrderId: paypalOrder.id,
+            amount: totalAmount,
+            currency: "USD"
+        });
 
     } catch (error) {
-        console.error('Create Order Unexpected Error:', error);
-        res.status(500).json({ error: `Internal Server Error: ${error.message}` });
+        console.error('Create PayPal Order Error:', error);
+        res.status(500).json({ error: error.message });
     }
 };
 
-// Verify Payment
+// Capture PayPal Payment
 exports.verifyPayment = async (req, res) => {
     try {
-        const {
-            razorpay_order_id,
-            razorpay_payment_id,
-            razorpay_signature,
-            orderId // Our DB Order ID
-        } = req.body;
+        const { paypalOrderId } = req.body;
 
-        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const captureData = await paypal.capturePayment(paypalOrderId);
 
-        const expectedSignature = crypto
-            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-            .update(body.toString())
-            .digest("hex");
-
-        const isAuthentic = expectedSignature === razorpay_signature;
-
-        if (isAuthentic) {
-            // Update Order
-            const order = await Order.findOne({ 'paymentDetails.razorpay_order_id': razorpay_order_id });
+        if (captureData.status === 'COMPLETED') {
+            const order = await Order.findOne({ 'paymentDetails.paypal_order_id': paypalOrderId });
 
             if (!order) {
                 return res.status(404).json({ error: 'Order not found' });
             }
 
-            const Transaction = require('../models/Transaction');
-
-            // ...
-
-            order.paymentDetails.razorpay_payment_id = razorpay_payment_id;
-            order.paymentDetails.razorpay_signature = razorpay_signature;
+            order.paymentDetails.paypal_capture_id = captureData.purchase_units[0].payments.captures[0].id;
             order.paymentStatus = 'Paid';
             await order.save();
 
             // Create Transaction Record
             await Transaction.create({
                 orderId: order._id,
-                transactionId: razorpay_payment_id,
+                transactionId: order.paymentDetails.paypal_capture_id,
                 amount: order.totalAmount,
                 status: 'success',
                 breakdown: {
                     subtotal: order.totalAmount,
-                    platformFee: order.totalAmount * 0.02 // Mock 2% fee
+                    platformFee: 0
                 }
             });
 
             // Clear Cart
-            // We use the user/guestId from the order to find the cart
             if (order.user) {
                 await Cart.findOneAndDelete({ user: order.user });
             } else if (order.guestId) {
                 await Cart.findOneAndDelete({ guestId: order.guestId });
             }
 
-            res.json({ success: true, message: 'Payment verified successfully' });
+            res.json({ success: true, message: 'Payment captured successfully' });
         } else {
-            res.status(400).json({ success: false, error: 'Invalid signature' });
+            res.status(400).json({ success: false, error: 'Payment not completed' });
         }
 
     } catch (error) {
-        console.error('Verify Payment Error:', error);
+        console.error('Capture PayPal Payment Error:', error);
         res.status(500).json({ error: error.message });
     }
 };

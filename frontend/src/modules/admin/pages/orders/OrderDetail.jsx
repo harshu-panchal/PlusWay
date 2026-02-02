@@ -156,7 +156,7 @@ const OrderDetail = () => {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-gray-500">Method</span>
-                                <span className="font-medium">Razorpay</span>
+                                <span className="font-medium">PayPal</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-gray-500">Status</span>
@@ -166,8 +166,8 @@ const OrderDetail = () => {
                                 </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-500">Transaction ID</span>
-                                <span className="font-mono text-xs">{currentOrder.paymentDetails?.razorpay_payment_id || 'N/A'}</span>
+                                <span className="text-gray-500">Capture ID</span>
+                                <span className="font-mono text-xs">{currentOrder.paymentDetails?.paypal_capture_id || 'N/A'}</span>
                             </div>
                         </div>
                     </div>

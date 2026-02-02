@@ -107,328 +107,159 @@ const Header = () => {
     };
 
     return (
-        <header className="bg-white sticky top-0 z-50 shadow-sm/50 transition-all duration-300 backdrop-blur-md bg-white/95">
-            <CartDrawer />
+        <header className="sticky top-0 z-50 transition-all duration-300">
+            <div className="glass shadow-soft">
+                <CartDrawer />
 
-            {/* Top Navigation Bar - Premium Dark Theme */}
-            <div className="bg-slate-900 text-slate-300 py-2">
-                <div className="mx-[10%]">
-                    <div className="flex items-center justify-between h-8 text-xs font-medium tracking-wide">
-                        {/* Top Nav Links - Desktop */}
-                        <nav className="hidden lg:flex items-center space-x-8">
-                            {topNavItems.map((item) => (
-                                <Link
-                                    key={item.label}
-                                    to={item.href}
-                                    className="hover:text-white transition-colors uppercase"
-                                >
-                                    {item.label}
-                                </Link>
-                            ))}
-                        </nav>
-
-                        {/* Right Side - User Account */}
-                        <div className="flex items-center space-x-6 ml-auto">
-                            <Link
-                                to={user ? "/profile" : "/login"}
-                                className="flex items-center space-x-2 hover:text-white transition-colors group"
-                            >
-                                <div className="p-1 bg-slate-800 rounded-full group-hover:bg-slate-700 transition-colors">
-                                    <User className="w-3 h-3" />
-                                </div>
-                                <span className="hidden sm:inline">
-                                    {user ? `Hi, ${user.name.split(' ')[0]}` : 'LOG IN'}
-                                </span>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Header */}
-            <div className="mx-[10%]">
-                <div className="flex items-center justify-between py-5 gap-6">
-                    {/* Logo - Modern & Bold */}
-                    <Link to="/" className="flex items-center gap-2 flex-shrink-0 group">
-                        <div className="relative flex items-center justify-center w-10 h-10 bg-gradient-to-br from-teal-500 to-blue-600 rounded-xl shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
-                            <Zap className="w-6 h-6 text-white relative z-10" fill="currentColor" />
-                            {/* Shine effect */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover:animate-shine z-0" />
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700 group-hover:from-teal-600 group-hover:to-blue-600 transition-all duration-300 leading-none">
-                                PLUSWAY
-                            </span>
-                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-[0.3em] group-hover:text-teal-500 transition-colors leading-none mt-0.5">
-                                STORE
-                            </span>
-                        </div>
-                        <style>{`
-                            @keyframes shine {
-                                100% { transform: translateX(100%); }
-                            }
-                            .animate-shine {
-                                animation: shine 0.7s;
-                            }
-                        `}</style>
-                    </Link>
-
-                    {/* Product Catalog Button - Rounded Pill with Dropdown */}
-                    <div className="relative hidden lg:block" ref={catalogRef}>
-                        <button
-                            onClick={() => setIsCatalogOpen(!isCatalogOpen)}
-                            className={`flex items-center gap-2.5 px-6 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg active:translate-y-0 ${isCatalogOpen ? 'bg-teal-600 text-white' : 'bg-teal-500 hover:bg-teal-600 text-white hover:-translate-y-0.5'}`}
-                        >
-                            {isCatalogOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                            <span className="font-semibold text-sm">Product Catalog</span>
-                        </button>
-
-                        {/* Dropdown Menu */}
-                        {isCatalogOpen && (
-                            <div className="absolute top-full left-0 mt-3 flex items-start z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                {/* Main Catalog List */}
-                                <div className="w-72 max-h-[65vh] overflow-y-auto bg-white rounded-xl shadow-xl border border-gray-100 py-2 relative z-20">
-                                    <div className="flex flex-col">
-                                        <div
-                                            onMouseEnter={() => setActiveCategory(null)}
-                                        >
-                                            <Link
-                                                to="/products"
-                                                className={`flex items-center justify-between px-5 py-3 transition-colors group border-b border-gray-50 bg-slate-50`}
-                                                onClick={() => setIsCatalogOpen(false)}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-6 h-6 flex items-center justify-center text-teal-500">
-                                                        <Box className="w-5 h-5" strokeWidth={2} />
-                                                    </div>
-                                                    <span className="font-medium text-slate-700 group-hover:text-teal-700">
-                                                        Show all products
-                                                    </span>
-                                                </div>
-                                            </Link>
-                                        </div>
-
-                                        {rootCategories.map((category) => {
-                                            const hasSub = getChildren(category._id).length > 0;
-                                            return (
-                                                <div
-                                                    key={category._id}
-                                                    onMouseEnter={() => hasSub ? setActiveCategory(category._id) : setActiveCategory(null)}
-                                                >
-                                                    <Link
-                                                        to={buildCategoryPath(category)}
-                                                        className={`flex items-center justify-between px-5 py-3 transition-colors group border-b border-gray-50 last:border-0 ${activeCategory === category._id ? 'bg-slate-50 text-teal-600' : 'hover:bg-slate-50'}`}
-                                                        onClick={() => !hasSub && setIsCatalogOpen(false)}
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`w-6 h-6 flex items-center justify-center ${activeCategory === category._id ? 'text-teal-600' : 'text-slate-400'}`}>
-                                                                {/* Render icon image if available, else default icon */}
-                                                                {category.icon ? (
-                                                                    <img src={category.icon} alt="" className="w-5 h-5 object-contain" />
-                                                                ) : (
-                                                                    <Zap className="w-5 h-5" />
-                                                                )}
-                                                            </div>
-                                                            <span className={`font-medium ${activeCategory === category._id ? 'text-teal-700' : 'text-slate-700 group-hover:text-teal-700'}`}>
-                                                                {category.name}
-                                                            </span>
-                                                        </div>
-                                                        {hasSub && (
-                                                            <ChevronRight className={`w-4 h-4 transition-colors ${activeCategory === category._id ? 'text-teal-500' : 'text-gray-300 group-hover:text-teal-500'}`} />
-                                                        )}
-                                                    </Link>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                {/* Dynamic Sub-Menu Panel */}
-                                {activeCategory && (
-                                    <div className="w-[800px] h-[65vh] overflow-y-auto bg-white rounded-xl shadow-xl border border-gray-100 p-8 ml-4 relative z-10 animate-in slide-in-from-left-2 duration-200">
-                                        <div className="grid grid-cols-3 gap-x-8 gap-y-8">
-                                            {getChildren(activeCategory)
-                                                .sort((a, b) => {
-                                                    const countA = getChildren(a._id).length;
-                                                    const countB = getChildren(b._id).length;
-                                                    return countB - countA || a.name.localeCompare(b.name);
-                                                })
-                                                .map((subCat) => {
-                                                    const subSubCats = getChildren(subCat._id);
-                                                    return (
-                                                        <div key={subCat._id} className="break-inside-avoid">
-                                                            <Link to={buildCategoryPath(subCat)}>
-                                                                <h3 className="text-lg font-bold text-teal-600 mb-3 hover:underline cursor-pointer">
-                                                                    {subCat.name}
-                                                                </h3>
-                                                            </Link>
-
-                                                            {subSubCats.length > 0 && (
-                                                                <ul className="space-y-2">
-                                                                    {subSubCats.map((child) => (
-                                                                        <li key={child._id}>
-                                                                            <Link
-                                                                                to={buildCategoryPath(child)}
-                                                                                className="text-gray-600 hover:text-teal-500 transition-colors text-sm font-medium block"
-                                                                                onClick={() => setIsCatalogOpen(false)}
-                                                                            >
-                                                                                {child.name}
-                                                                            </Link>
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Search Bar - Modern Gray Background */}
-                    <div className="hidden md:flex flex-1 max-w-2xl px-4">
-                        <form onSubmit={handleSearch} className="relative w-full group">
-                            <input
-                                type="text"
-                                placeholder="Search for premium accessories..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-5 pr-14 py-3 bg-gray-100/80 border-2 border-transparent focus:bg-white focus:border-primary-100 rounded-full outline-none transition-all placeholder:text-gray-400 text-gray-700 font-medium"
-                            />
-                            <button type="submit" className="absolute right-1.5 top-1.5 bottom-1.5 w-11 bg-white hover:bg-primary-50 text-primary-600 rounded-full flex items-center justify-center transition-colors shadow-sm cursor-pointer">
-                                <Search className="w-5 h-5" />
-                            </button>
-                        </form>
-                    </div>
-
-                    {/* Right Actions */}
-                    <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
-                        {/* Phone Number - Desktop */}
-                        <div className="hidden xl:flex items-center gap-3 text-slate-700">
-                            <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center text-teal-600">
-                                <Phone className="w-5 h-5" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Call Us</span>
-                                <span className="text-sm font-bold text-slate-900 whitespace-nowrap">+91 98701 62128</span>
-                            </div>
-                        </div>
-
-                        {/* Wishlist Link - Visible on all screens */}
-                        <Link
-                            to="/wishlist"
-                            className="flex items-center justify-center p-2 rounded-full hover:bg-red-50 text-slate-700 hover:text-red-500 transition-colors group relative min-w-[44px] min-h-[44px]"
-                            title="My Wishlist"
-                        >
-                            <Heart className="w-5 h-5 sm:w-6 sm:h-6 group-hover:fill-red-500 transition-colors" />
-                        </Link>
-
-                        {/* Cart - Responsive Design */}
-                        <button
-                            onClick={() => dispatch(openCart())}
-                            className="flex items-center gap-2 sm:gap-3 pl-1 sm:pl-2 pr-2 sm:pr-4 py-1.5 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all group min-w-[44px] min-h-[44px]"
-                        >
-                            <div className="relative p-2">
-                                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-slate-700 group-hover:text-primary-600 transition-colors" />
-                                <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white">
-                                    {totalQuantity}
-                                </span>
-                            </div>
-                            {/* Cart details - hidden on mobile */}
-                            <div className="hidden sm:flex flex-col items-end">
-                                <span className="text-xs text-slate-400 font-medium">My Cart</span>
-                                <span className="text-sm font-bold text-slate-900">₹{totalAmount}</span>
-                            </div>
-                        </button>
-                    </div>
-
-                    {/* Mobile Menu Button */}
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="lg:hidden p-2 text-slate-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                        {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                    </button>
-                </div>
-
-                {/* Mobile Search Bar - Improved */}
-                <div className="md:hidden pb-4">
-                    <form onSubmit={handleSearch} className="relative w-full">
-                        <input
-                            type="text"
-                            placeholder="Search accessories..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-4 pr-12 py-3 bg-gray-100 border-none rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-sm"
-                        />
-                        <button type="submit" className="absolute right-2 top-2 bottom-2 px-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow-sm flex items-center justify-center transition-colors min-w-[44px]">
-                            <Search className="w-4 h-4" />
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            {/* Mobile Menu - Enhanced */}
-            {isMenuOpen && (
-                <div className="lg:hidden border-t border-gray-200 bg-white">
-                    <div className="mx-4 sm:mx-[10%] py-4">
-                        <nav className="flex flex-col space-y-3">
-                            {/* Product Catalog Button - Mobile */}
-                            <Link
-                                to="/products"
-                                className="flex items-center justify-center space-x-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-3 rounded-lg transition-colors min-h-[48px] font-medium"
-                                onClick={() => setIsMenuOpen(false)}
-                            >
-                                <Menu className="w-5 h-5" />
-                                <span>Browse All Products</span>
-                            </Link>
-
-                            {/* Quick Links */}
-                            <div className="grid grid-cols-2 gap-2">
-                                <Link
-                                    to="/wishlist"
-                                    className="flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2.5 rounded-lg transition-colors min-h-[44px] text-sm font-medium"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    <Heart className="w-4 h-4" />
-                                    <span>Wishlist</span>
-                                </Link>
-                                <Link
-                                    to="/orders"
-                                    className="flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2.5 rounded-lg transition-colors min-h-[44px] text-sm font-medium"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    <Box className="w-4 h-4" />
-                                    <span>Orders</span>
-                                </Link>
-                            </div>
-
-                            {/* Phone Number - Mobile */}
-                            <a href="tel:+919870162128" className="flex items-center space-x-2 text-gray-700 px-4 py-3 bg-gray-50 rounded-lg min-h-[48px]">
-                                <Phone className="w-5 h-5 text-teal-500" />
-                                <span className="text-sm font-semibold">+91 98701 62128</span>
-                            </a>
-
-                            {/* Top Nav Items */}
-                            <div className="border-t border-gray-200 pt-3 space-y-1">
+                {/* Top Navigation Bar - Professional Desktop-only */}
+                <div className="hidden lg:block bg-slate-900 text-slate-400 py-1.5 border-b border-slate-800">
+                    <div className="container mx-auto px-4 lg:px-[10%]">
+                        <div className="flex items-center justify-between h-7 text-[10px] font-bold tracking-widest uppercase">
+                            <nav className="flex items-center space-x-6">
                                 {topNavItems.map((item) => (
                                     <Link
                                         key={item.label}
                                         to={item.href}
-                                        className="block text-gray-600 hover:text-teal-600 hover:bg-gray-50 transition-colors py-3 px-4 rounded-lg min-h-[44px] text-sm"
-                                        onClick={() => setIsMenuOpen(false)}
+                                        className="hover:text-white transition-colors"
                                     >
                                         {item.label}
                                     </Link>
                                 ))}
+                            </nav>
+
+                            <div className="flex items-center space-x-6">
+                                <Link
+                                    to={user ? "/profile" : "/login"}
+                                    className="flex items-center space-x-2 hover:text-white transition-colors"
+                                >
+                                    <User className="w-3 h-3 text-teal-500" />
+                                    <span>{user ? `Account: ${user.name.split(' ')[0]}` : 'Sign In'}</span>
+                                </Link>
                             </div>
-                        </nav>
+                        </div>
                     </div>
                 </div>
-            )}
+
+                {/* Main Header */}
+                <div className="container mx-auto px-4 lg:px-[10%]">
+                    <div className="flex items-center justify-between py-3 lg:py-4 gap-4 lg:gap-8">
+                        {/* Logo */}
+                        <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
+                            <div className="relative flex items-center justify-center w-10 h-10 lg:w-11 lg:h-11 bg-gradient-to-br from-teal-500 to-blue-600 rounded-[14px] shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform duration-300">
+                                <Zap className="w-6 h-6 lg:w-7 lg:h-7 text-white" fill="currentColor" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-xl lg:text-2xl font-black tracking-tighter text-slate-900 leading-none">
+                                    PLUSWAY
+                                </span>
+                                <span className="text-[9px] lg:text-[10px] uppercase font-bold text-slate-400 tracking-[0.3em] leading-none mt-1">
+                                    STORE
+                                </span>
+                            </div>
+                        </Link>
+
+                        {/* Catalog - Desktop */}
+                        <div className="relative hidden lg:block" ref={catalogRef}>
+                            <button
+                                onClick={() => setIsCatalogOpen(!isCatalogOpen)}
+                                className={`flex items-center gap-3 px-6 py-2.5 rounded-full font-bold text-sm transition-all ${isCatalogOpen
+                                    ? 'bg-slate-900 text-white shadow-lg'
+                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                    }`}
+                            >
+                                {isCatalogOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                                Catalog
+                            </button>
+
+                            {/* Dropdown Menu (Existing Logic Kept) */}
+                            {isCatalogOpen && (
+                                <div className="absolute top-full left-0 mt-4 flex items-start z-50 animate-fade-in-up">
+                                    <div className="w-72 max-h-[70vh] overflow-y-auto bg-white rounded-2xl shadow-premium border border-slate-100 py-3 relative z-20">
+                                        {/* ... root categories section ... */}
+                                        <div className="flex flex-col">
+                                            <Link to="/products" className="flex items-center gap-3 px-6 py-3 bg-slate-50 text-teal-600 font-bold text-sm" onClick={() => setIsCatalogOpen(false)}>
+                                                <Box className="w-4 h-4" />
+                                                Browse All
+                                            </Link>
+                                            {rootCategories.map((category) => (
+                                                <div key={category._id} onMouseEnter={() => setActiveCategory(category._id)}>
+                                                    <Link
+                                                        to={buildCategoryPath(category)}
+                                                        className={`flex items-center justify-between px-6 py-3 text-sm font-semibold transition-colors ${activeCategory === category._id ? 'text-teal-600 bg-teal-50/50' : 'text-slate-600 hover:bg-slate-50'}`}
+                                                        onClick={() => setIsCatalogOpen(false)}
+                                                    >
+                                                        <span className="truncate">{category.name}</span>
+                                                        {getChildren(category._id).length > 0 && <ChevronRight className="w-4 h-4 opacity-50" />}
+                                                    </Link>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    {activeCategory && getChildren(activeCategory).length > 0 && (
+                                        <div className="w-[600px] h-[70vh] overflow-y-auto bg-white rounded-2xl shadow-premium border border-slate-100 p-8 ml-4 animate-fade-in-up">
+                                            <div className="grid grid-cols-2 gap-8">
+                                                {getChildren(activeCategory).map((sub) => (
+                                                    <div key={sub._id}>
+                                                        <Link to={buildCategoryPath(sub)} onClick={() => setIsCatalogOpen(false)}>
+                                                            <h4 className="font-bold text-slate-900 mb-3 hover:text-teal-600">{sub.name}</h4>
+                                                        </Link>
+                                                        <div className="flex flex-col space-y-2">
+                                                            {getChildren(sub._id).map((child) => (
+                                                                <Link key={child._id} to={buildCategoryPath(child)} className="text-sm text-slate-500 hover:text-teal-500" onClick={() => setIsCatalogOpen(false)}>
+                                                                    {child.name}
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Search - Responsive */}
+                        <div className="flex-1 max-w-xl mx-2 lg:mx-4">
+                            <form onSubmit={handleSearch} className="relative group">
+                                <input
+                                    type="text"
+                                    placeholder="Search products..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-5 pr-12 py-2.5 lg:py-3 bg-slate-100 border-2 border-transparent focus:bg-white focus:border-teal-500 rounded-full outline-none transition-all text-sm font-medium"
+                                />
+                                <button type="submit" className="absolute right-2 top-1.5 lg:top-2 w-8 h-8 lg:w-9 lg:h-9 bg-teal-500 hover:bg-teal-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm">
+                                    <Search className="w-4 h-4" />
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-1 lg:gap-4">
+                            <Link to="/wishlist" className="p-2.5 text-slate-600 hover:text-red-500 transition-colors relative">
+                                <Heart className="w-5 h-5 lg:w-6 lg:h-6" />
+                            </Link>
+
+                            <button onClick={() => dispatch(openCart())} className="flex items-center gap-2 p-1.5 lg:p-2.5 bg-slate-900 lg:bg-transparent text-white lg:text-slate-900 rounded-full lg:rounded-none group">
+                                <div className="relative">
+                                    <ShoppingCart className="w-5 h-5 lg:w-6 lg:h-6 lg:group-hover:text-teal-600" />
+                                    {totalQuantity > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white lg:border-slate-50">
+                                            {totalQuantity}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="hidden lg:flex flex-col items-start leading-none">
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cart</span>
+                                    <span className="text-xs font-bold">₹{totalAmount}</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <CartDrawer />
         </header>
     );
 };

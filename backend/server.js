@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const compression = require('compression');
 require('dotenv').config();
 
 const app = express();
@@ -25,11 +26,13 @@ console.log('🔒 CORS Configuration:');
 console.log('   Allowed Origins:', allowedOrigins);
 console.log('   FRONTEND_URL:', process.env.FRONTEND_URL);
 
+app.use(compression()); // Compress all responses
 app.use(cors({
     origin: allowedOrigins,
     credentials: true
 }));
-app.use(express.json({ limit: '10kb' })); // Limit body size
+app.use(express.json({ limit: '10mb' })); // Increased limit for larger data syncs
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
@@ -37,15 +40,22 @@ app.use(cookieParser());
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/appzeto';
 
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URI, {
+    maxPoolSize: 10, // Maintain up to 10 socket connections
+    serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+    socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+})
     .then(() => {
-        console.log('✅ MongoDB Connected');
+        console.log('✅ MongoDB Connected with optimized pool');
         app.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
         });
     })
     .catch((err) => {
-        console.error('❌ Database Connection Error:', err);
+        console.error('❌ Database Connection Error:');
+        console.error('   Error Name:', err.name);
+        console.error('   Error Message:', err.message);
+        console.error('   Check if your IP is whitelisted in MongoDB Atlas or if your network blocks MongoDB connections.');
     });
 
 // Health Check Endpoint for Render
@@ -94,6 +104,7 @@ app.use('/api/brands', require('./routes/brandRoutes'));
 app.use('/api/finance', financialRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/delivery', deliveryRoutes);
+app.use('/api/paypal', require('./routes/paypalRoutes'));
 app.use('/api/deals', require('./routes/dealRoutes'));
 
 // Global Error Handler

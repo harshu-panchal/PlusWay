@@ -33,12 +33,7 @@ exports.getProducts = async (req, res) => {
 
         // 1. Search (Title or SKU)
         if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { sku: { $regex: search, $options: 'i' } },
-                // check variants sku as well
-                { 'variants.sku': { $regex: search, $options: 'i' } }
-            ];
+            query.$text = { $search: search };
         }
 
         // 2. Status Filter
@@ -121,7 +116,8 @@ exports.getProducts = async (req, res) => {
             .populate('category')
             .populate('rootCategory')
             .skip((page - 1) * limit)
-            .limit(parseInt(limit));
+            .limit(parseInt(limit))
+            .lean();
 
         res.json({
             products,
@@ -138,7 +134,8 @@ exports.getProductById = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id)
             .populate('category')
-            .populate('rootCategory');
+            .populate('rootCategory')
+            .lean();
 
         if (!product) return res.status(404).json({ error: 'Product not found' });
         res.json(product);
@@ -151,7 +148,8 @@ exports.getProductBySlug = async (req, res) => {
     try {
         const product = await Product.findOne({ slug: req.params.slug })
             .populate('category')
-            .populate('rootCategory');
+            .populate('rootCategory')
+            .lean();
 
         if (!product) return res.status(404).json({ error: 'Product not found' });
         res.json(product);

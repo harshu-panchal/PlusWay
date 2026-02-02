@@ -12,10 +12,19 @@
   body {
     @apply m-0 font-sans antialiased text-slate-900 bg-slate-50;
     font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
 @layer utilities {
+  /* Glassmorphism */
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20;
+  }
+  
+  .glass-dark {
+    @apply bg-slate-900/70 backdrop-blur-md border border-slate-700/30;
+  }
 
   /* Custom Scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
@@ -31,15 +40,37 @@
     @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
   }
 
-  /* Fade in up animation */
+  /* Premium Shadows */
+  .shadow-premium {
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  }
+
+  .shadow-soft {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Background Patterns */
+  .bg-grid-slate-100 {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(241 245 249 / 1)'%3E%3Cpath d='M0 .5H31.5V32'/%3E%3C/svg%3E");
+  }
+
+  /* Animations */
   @keyframes fadeInUp {
     from {
       opacity: 0;
       transform: translateY(20px);
     }
-
     to {
       opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
       transform: translateY(0);
     }
   }
@@ -48,15 +79,13 @@
     animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
-  .animation-delay-200 {
-    animation-delay: 0.2s;
-    opacity: 0;
+  .animate-slide-in-up {
+    animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  .animation-delay-400 {
-    animation-delay: 0.4s;
-    opacity: 0;
-  }
+  .animation-delay-200 { animation-delay: 0.2s; opacity: 0; }
+  .animation-delay-400 { animation-delay: 0.4s; opacity: 0; }
+  .animation-delay-600 { animation-delay: 0.6s; opacity: 0; }
 
   /* Smooth transitions */
   .transition-smooth {
@@ -64,10 +93,22 @@
   }
 
   /* Line clamp utilities */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  /* Safe Area Insets for Mobile */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }

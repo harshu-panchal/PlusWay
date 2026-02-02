@@ -7,7 +7,7 @@ const transactionSchema = new mongoose.Schema({
         required: true
     },
     transactionId: {
-        type: String, // Razorpay payment ID
+        type: String, // Payment Gateway ID (e.g., PayPal Capture ID)
         required: true,
         unique: true
     },
