@@ -9,7 +9,12 @@ exports.createOrder = async (req, res) => {
         const { shippingAddress, guestId } = req.body;
         const userId = req.user ? req.user._id : req.body.userId;
 
+        console.log('--- Create Order Request ---');
+        console.log('User ID:', userId);
+        console.log('Guest ID:', guestId);
+
         if (!userId && !guestId) {
+            console.log('Error: User identification missing');
             return res.status(400).json({ error: 'User identification required' });
         }
 
@@ -59,14 +64,19 @@ exports.createOrder = async (req, res) => {
         }
 
         // Create PayPal Order
-        // For testing, we might want to convert INR to USD if sandbox doesn't support INR well,
-        // but PayPal supports many currencies. Let's stick to the requested currency if possible,
-        // or default to USD for sandbox testing if needed. 
-        // NOTE: Indian PayPal accounts have restrictions on domestic INR payments.
-        // If the user is in India, they might need to use USD for sandbox testing.
+        // Conversion logic: If the system uses INR (as suggested by the UI) but PayPal expects USD,
+        // we should convert the amount to avoid charging $1000 for a ₹1000 item.
+        // For Sandbox testing, we'll use a conversion rate of 1 USD = 80 INR
+        const conversionRate = 80;
+        const amountInUSD = (totalAmount / conversionRate).toFixed(2);
+
+        console.log('--- PayPal Order Creation ---');
+        console.log(`Original Amount (INR): ${totalAmount}`);
+        console.log(`Converted Amount (USD): ${amountInUSD}`);
+
         const paypalOrder = await paypal.createOrder({
-            amount: totalAmount,
-            currency: "USD" // Common for international testing, change to "INR" if account supports it
+            amount: amountInUSD,
+            currency: "USD"
         });
 
         const newOrder = new Order({
@@ -83,12 +93,15 @@ exports.createOrder = async (req, res) => {
 
         await newOrder.save();
 
-        res.status(201).json({
+        const responseData = {
             id: newOrder._id,
             paypalOrderId: paypalOrder.id,
             amount: totalAmount,
             currency: "USD"
-        });
+        };
+        console.log('Order created successfully in DB. Returning:', responseData);
+
+        res.status(201).json(responseData);
 
     } catch (error) {
         console.error('Create PayPal Order Error:', error);

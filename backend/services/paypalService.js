@@ -39,17 +39,22 @@ const createOrder = async (cart) => {
 
     const accessToken = await generateAccessToken();
     const url = `${base}/v2/checkout/orders`;
+    // Format amount to 2 decimal places string
+    const formattedAmount = parseFloat(cart.amount).toFixed(2);
+
     const payload = {
         intent: "CAPTURE",
         purchase_units: [
             {
                 amount: {
                     currency_code: cart.currency || "USD",
-                    value: cart.amount.toString(),
+                    value: formattedAmount,
                 },
             },
         ],
     };
+
+    console.log("PayPal Request Payload:", JSON.stringify(payload, null, 2));
 
     const response = await axios({
         url,
@@ -61,7 +66,9 @@ const createOrder = async (cart) => {
         data: JSON.stringify(payload),
     });
 
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    console.log("PayPal Order Created Success:", data.id);
+    return data;
 };
 
 /**

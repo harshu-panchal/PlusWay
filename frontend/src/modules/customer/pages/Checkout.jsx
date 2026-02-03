@@ -67,10 +67,16 @@ const Checkout = () => {
     };
 
     const initialOptions = {
-        "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID,
+        "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "sb",
         currency: "USD",
         intent: "capture",
     };
+
+    useEffect(() => {
+        if (!import.meta.env.VITE_PAYPAL_CLIENT_ID) {
+            console.error("PayPal Client ID is missing in .env");
+        }
+    }, []);
 
     return (
         <PayPalScriptProvider options={initialOptions}>
@@ -251,18 +257,41 @@ const Checkout = () => {
                                     style={{ layout: "vertical" }}
                                     createOrder={async () => {
                                         try {
+                                            // Validate form before creating order
+                                            if (!formData.fullName || !formData.phone || !formData.addressLine || !formData.city || !formData.state || !formData.zipCode) {
+                                                alert("Please fill in all shipping details first.");
+                                                return null;
+                                            }
+
+                                            console.log("Creating order with data:", formData);
                                             const result = await dispatch(createOrder(formData));
+
                                             if (createOrder.fulfilled.match(result)) {
                                                 const orderData = result.payload;
                                                 setDbOrderId(orderData.id);
+
+                                                if (!orderData.paypalOrderId) {
+                                                    throw new Error("No PayPal Order ID returned from server");
+                                                }
+
+                                                console.log("Successfully created order. PayPal ID:", orderData.paypalOrderId);
                                                 return orderData.paypalOrderId;
                                             } else {
-                                                throw new Error(result.payload || "Failed to create order");
+                                                const errorMsg = result.payload?.error || result.payload?.message || result.payload || "Failed to create order";
+                                                throw new Error(errorMsg);
                                             }
                                         } catch (err) {
-                                            alert(err.message);
+                                            console.error("Detailed Order Creation Error:", err);
+                                            alert("Order Error: " + err.message);
                                             return null;
                                         }
+                                    }}
+                                    onCancel={() => {
+                                        console.log("Payment cancelled by user");
+                                    }}
+                                    onError={(err) => {
+                                        console.error("PayPal Error:", err);
+                                        alert("PayPal Button Error: " + err.message);
                                     }}
                                     onApprove={async (data, actions) => {
                                         try {
