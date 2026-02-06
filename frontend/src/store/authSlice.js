@@ -168,8 +168,13 @@ const authSlice = createSlice({
             })
             .addCase(checkAuth.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.isAuthenticated = true;
-                state.user = action.payload.data;
+                if (action.payload && action.payload.success) {
+                    state.isAuthenticated = true;
+                    state.user = action.payload.data;
+                } else {
+                    state.isAuthenticated = false;
+                    state.user = null;
+                }
             })
             .addCase(checkAuth.rejected, (state) => {
                 state.isLoading = false;

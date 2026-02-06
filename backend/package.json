@@ -13,6 +13,7 @@
         "npm": ">=9.0.0"
     },
     "dependencies": {
+        "@google-cloud/translate": "^9.3.0",
         "bcryptjs": "^3.0.3",
         "cloudinary": "^1.41.3",
         "compression": "^1.8.1",

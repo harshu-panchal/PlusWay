@@ -7,6 +7,14 @@ import Button from '../../../shared/components/ui/Button';
 import { Loader2, ShieldCheck, MapPin, CheckCircle } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
+import { useRef } from 'react';
+
+const initialOptions = {
+    "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "sb",
+    currency: "USD",
+    intent: "capture",
+};
+
 const Checkout = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -14,12 +22,18 @@ const Checkout = () => {
     const { loading: orderLoading } = useSelector((state) => state.order);
     const { user } = useSelector((state) => state.auth);
 
+    const dbOrderIdRef = useRef(null);
+
     const [savedAddresses, setSavedAddresses] = useState([]);
     const [selectedAddressId, setSelectedAddressId] = useState(null);
     const [isOrderCreated, setIsOrderCreated] = useState(false);
     const [paypalOrderId, setPaypalOrderId] = useState(null);
+<<<<<<< HEAD
     const [dbOrderId, setDbOrderId] = useState(null);
     const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
+=======
+    // const [dbOrderId, setDbOrderId] = useState(null); // Moved to Ref to avoid re-renders during PayPal flow
+>>>>>>> 0ff69c7a3dfecf9b3eab0ed464bcc65118c3bbec
 
     const [formData, setFormData] = useState({
         fullName: user?.name || '',
@@ -67,15 +81,13 @@ const Checkout = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const initialOptions = {
-        "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "sb",
-        currency: "USD",
-        intent: "capture",
-    };
-
     useEffect(() => {
+        console.log("PayPal Configuration:", {
+            clientId: initialOptions["client-id"],
+            currency: initialOptions.currency
+        });
         if (!import.meta.env.VITE_PAYPAL_CLIENT_ID) {
-            console.error("PayPal Client ID is missing in .env");
+            console.warn("VITE_PAYPAL_CLIENT_ID is missing in .env, using 'sb' (sandbox default)");
         }
     }, []);
 
@@ -367,7 +379,6 @@ const Checkout = () => {
                                     style={{ layout: "vertical" }}
                                     createOrder={async () => {
                                         try {
-                                            // Validate form before creating order
                                             if (!formData.fullName || !formData.phone || !formData.addressLine || !formData.city || !formData.state || !formData.zipCode) {
                                                 alert("Please fill in all shipping details first.");
                                                 return null;
@@ -378,13 +389,13 @@ const Checkout = () => {
 
                                             if (createOrder.fulfilled.match(result)) {
                                                 const orderData = result.payload;
-                                                setDbOrderId(orderData.id);
+                                                dbOrderIdRef.current = orderData.id;
 
                                                 if (!orderData.paypalOrderId) {
                                                     throw new Error("No PayPal Order ID returned from server");
                                                 }
 
-                                                console.log("Successfully created order. PayPal ID:", orderData.paypalOrderId);
+                                                console.log("Successfully created order. Internal ID:", orderData.id, "PayPal ID:", orderData.paypalOrderId);
                                                 return orderData.paypalOrderId;
                                             } else {
                                                 const errorMsg = result.payload?.error || result.payload?.message || result.payload || "Failed to create order";
@@ -397,27 +408,29 @@ const Checkout = () => {
                                         }
                                     }}
                                     onCancel={() => {
-                                        console.log("Payment cancelled by user");
+                                        console.log("Payment cancelled by user. This can also happen if the PayPal popup fails to load or closes automatically.");
                                     }}
                                     onError={(err) => {
-                                        console.error("PayPal Error:", err);
-                                        alert("PayPal Button Error: " + err.message);
+                                        console.error("PayPal SDK Error:", err);
+                                        // Find more specific error message if possible
+                                        alert("PayPal encountered an error. Please ensure you are not logged into your PayPal Seller account in this browser.");
                                     }}
                                     onApprove={async (data, actions) => {
                                         try {
+                                            console.log("Payment approved. Capturing...", data.orderID);
                                             const verifyResult = await dispatch(verifyPayment({
                                                 paypalOrderId: data.orderID,
-                                                orderId: dbOrderId
+                                                orderId: dbOrderIdRef.current
                                             }));
 
                                             if (verifyPayment.fulfilled.match(verifyResult)) {
                                                 navigate('/order-success');
                                             } else {
-                                                alert('Payment verification failed');
+                                                alert('Payment verification failed. Please contact support.');
                                             }
                                         } catch (err) {
                                             console.error("Payment Capture Error:", err);
-                                            alert("Failed to capture payment");
+                                            alert("Failed to capture payment but the money might have been deducted. Please contact support.");
                                         }
                                     }}
                                 />

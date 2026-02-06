@@ -107,6 +107,7 @@ app.use('/api/delivery', deliveryRoutes);
 app.use('/api/paypal', require('./routes/paypalRoutes'));
 app.use('/api/razorpay', require('./routes/razorpayRoutes'));
 app.use('/api/deals', require('./routes/dealRoutes'));
+app.use('/api/translate', require('./routes/translationRoutes'));
 
 // Global Error Handler
 app.use((err, req, res, next) => {

@@ -112,3 +112,152 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* ============================================
+   RTL (Right-to-Left) Language Support
+   ============================================ */
+
+/* RTL Body Direction */
+body.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Flip flexbox direction for RTL */
+body.rtl .flex-row {
+  flex-direction: row-reverse;
+}
+
+body.rtl .flex-row-reverse {
+  flex-direction: row;
+}
+
+/* Flip margins and paddings for RTL */
+body.rtl .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+body.rtl .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* Flip text alignment for RTL */
+body.rtl .text-left {
+  text-align: right;
+}
+
+body.rtl .text-right {
+  text-align: left;
+}
+
+/* Flip icons and arrows for RTL */
+body.rtl .rotate-rtl {
+  transform: scaleX(-1);
+}
+
+/* Flip absolute positioning for RTL */
+body.rtl .left-0 {
+  left: auto;
+  right: 0;
+}
+
+body.rtl .right-0 {
+  right: auto;
+  left: 0;
+}
+
+/* Navigation RTL adjustments */
+body.rtl nav ul {
+  padding-right: 0;
+}
+
+/* Form inputs RTL */
+body.rtl input,
+body.rtl textarea,
+body.rtl select {
+  text-align: inherit;
+}
+
+body.rtl input[type="search"],
+body.rtl input[type="text"] {
+  padding-left: 0.75rem;
+  padding-right: 2.5rem;
+}
+
+/* Search icon position for RTL */
+body.rtl .search-icon {
+  left: auto;
+  right: 0.75rem;
+}
+
+/* Dropdown RTL */
+body.rtl .dropdown-menu {
+  left: auto;
+  right: 0;
+}
+
+/* Breadcrumbs RTL */
+body.rtl .breadcrumb-separator {
+  transform: scaleX(-1);
+}
+
+/* Slider/Carousel RTL */
+body.rtl .slider-container {
+  direction: rtl;
+}
+
+/* Table RTL */
+body.rtl table {
+  direction: rtl;
+}
+
+body.rtl th,
+body.rtl td {
+  text-align: right;
+}
+
+/* Modal RTL */
+body.rtl .modal-close {
+  left: 1rem;
+  right: auto;
+}
+
+/* Notification RTL */
+body.rtl .notification-icon {
+  margin-left: 0.75rem;
+  margin-right: 0;
+}
+
+/* Translation loading indicator */
+.translated-text.translating {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.auto-translated.translating {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+/* Language selector styles */
+.language-selector {
+  position: relative;
+  z-index: 50;
+}
+
+.language-selector__dropdown {
+  animation: fadeInDown 0.15s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -23,6 +23,6 @@ router.post('/register', validate(registerSchema), register);
 router.post('/register-delivery', registerDelivery); // Assuming delivery has different fields, skipping for now
 router.post('/login', validate(loginSchema), login);
 router.get('/logout', logout);
-router.get('/me', getMe);
+router.get('/me', protect, getMe);
 
 module.exports = router;
