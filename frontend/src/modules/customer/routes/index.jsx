@@ -36,11 +36,13 @@ const CustomerRoutes = () => {
                     <Route path="/products" element={<ProductListing />} />
                     <Route path="/product/:slug" element={<ProductDetail />} />
 
-                    {/* Protected Routes - Accessible by Customers and Admins for testing */}
+                    {/* Public Transaction Routes */}
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/order-success" element={<OrderSuccess />} />
+
+                    {/* Protected Routes - Accessible by Customers and Admins */}
                     <Route element={<ProtectedRoute allowedRoles={['customer', 'admin']} />}>
-                        <Route path="/cart" element={<Cart />} />
-                        <Route path="/checkout" element={<Checkout />} />
-                        <Route path="/order-success" element={<OrderSuccess />} />
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/orders/:id" element={<OrderDetail />} />
                         <Route path="/profile" element={<Profile />} />
