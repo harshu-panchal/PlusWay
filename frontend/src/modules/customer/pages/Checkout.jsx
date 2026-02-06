@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { createOrder, verifyPayment } from '../store/slices/orderSlice';
+import { createOrder, verifyPayment, createRazorpayOrder, verifyRazorpayPayment } from '../store/slices/orderSlice';
 import Button from '../../../shared/components/ui/Button';
 import { Loader2, ShieldCheck, MapPin, CheckCircle } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
@@ -29,6 +29,7 @@ const Checkout = () => {
     const [isOrderCreated, setIsOrderCreated] = useState(false);
     const [paypalOrderId, setPaypalOrderId] = useState(null);
     // const [dbOrderId, setDbOrderId] = useState(null); // Moved to Ref to avoid re-renders during PayPal flow
+    const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
     const [formData, setFormData] = useState({
         fullName: user?.name || '',
@@ -84,6 +85,101 @@ const Checkout = () => {
         if (!import.meta.env.VITE_PAYPAL_CLIENT_ID) {
             console.warn("VITE_PAYPAL_CLIENT_ID is missing in .env, using 'sb' (sandbox default)");
         }
+    }, []);
+
+    // Razorpay Payment Handler
+    const handleRazorpayPayment = async () => {
+        if (!formData.fullName || !formData.phone || !formData.addressLine || !formData.city || !formData.state || !formData.zipCode) {
+            alert("Please fill in all shipping details first.");
+            return;
+        }
+
+        if (!isRazorpayLoaded) {
+            alert("Razorpay SDK is still loading. Please check your internet connection and try again.");
+            return;
+        }
+
+        try {
+            // 1. Create Order on Backend
+            const result = await dispatch(createRazorpayOrder(formData));
+
+            if (createRazorpayOrder.fulfilled.match(result)) {
+                const { razorpayOrderId, amount, currency, key_id } = result.payload;
+
+                // 2. Open Razorpay Checkout
+                const options = {
+                    key: key_id,
+                    amount: amount * 100, // already in paise from backend? backend said it returns amount (TotalAmt). Backend creates order in paise. Let's check backend return.
+                    // Backend returns: amount: totalAmount (which is in base units e.g. INR 100).
+                    // Razorpay options expects paise. So amount * 100.
+                    // Wait, backend `createRazorpayOrder` creates order with `amount * 100`.
+                    // But response returns `amount: totalAmount`.
+                    // So here we need `amount: result.payload.amount * 100` OR use `razorpayOrderId` which already has amount linked?
+                    // options usually takes order_id.
+                    currency: currency,
+                    name: "PlusWay",
+                    description: "Order Payment",
+                    order_id: razorpayOrderId,
+                    handler: async function (response) {
+                        try {
+                            const verifyResult = await dispatch(verifyRazorpayPayment({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderId: result.payload.id
+                            }));
+
+                            if (verifyRazorpayPayment.fulfilled.match(verifyResult)) {
+                                navigate('/order-success');
+                            } else {
+                                alert('Payment verification failed');
+                            }
+                        } catch (err) {
+                            console.error("Verification Error:", err);
+                            alert("Payment verification failed");
+                        }
+                    },
+                    prefill: {
+                        name: formData.fullName,
+                        email: user?.email,
+                        contact: formData.phone
+                    },
+                    theme: {
+                        color: "#0d9488" // Teal-600
+                    }
+                };
+
+                const rzp1 = new window.Razorpay(options);
+                rzp1.on('payment.failed', function (response) {
+                    alert("Payment Failed: " + response.error.description);
+                });
+                rzp1.open();
+
+            } else {
+                alert("Failed to initiate payment");
+            }
+
+        } catch (err) {
+            console.error("Razorpay Error:", err);
+            alert("Payment initialization error");
+        }
+    };
+
+    // Load Razorpay Script
+    useEffect(() => {
+        const loadRazorpay = () => {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.async = true;
+            script.onload = () => setIsRazorpayLoaded(true);
+            script.onerror = () => {
+                console.error("Razorpay SDK failed to load");
+                setIsRazorpayLoaded(false);
+            };
+            document.body.appendChild(script);
+        };
+        loadRazorpay();
+        // Cleanup not strictly necessary for global script but good practice if SPA unmounts heavily
     }, []);
 
     return (
@@ -260,7 +356,21 @@ const Checkout = () => {
                                 </div>
                             </div>
 
-                            <div className="relative z-0">
+                            <div className="relative z-0 space-y-4">
+                                <button
+                                    onClick={handleRazorpayPayment}
+                                    disabled={orderLoading}
+                                    className="w-full bg-[#3399cc] hover:bg-[#2b86b3] text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm"
+                                >
+                                    {orderLoading ? <Loader2 className="animate-spin" /> : "Pay with Razorpay"}
+                                </button>
+
+                                <div className="relative flex items-center gap-2">
+                                    <div className="flex-1 border-t border-gray-200"></div>
+                                    <span className="text-xs text-gray-500 font-medium">OR USE PAYPAL</span>
+                                    <div className="flex-1 border-t border-gray-200"></div>
+                                </div>
+
                                 <PayPalButtons
                                     style={{ layout: "vertical" }}
                                     createOrder={async () => {

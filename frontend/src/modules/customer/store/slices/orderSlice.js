@@ -30,6 +30,24 @@ export const fetchMyOrders = createAsyncThunk('orders/fetchMyOrders', async (_, 
     }
 });
 
+export const createRazorpayOrder = createAsyncThunk('orders/createRazorpay', async (shippingAddress, { rejectWithValue }) => {
+    try {
+        return await orderService.createRazorpayOrder(shippingAddress);
+    } catch (error) {
+        return rejectWithValue(error.message);
+    }
+});
+
+export const verifyRazorpayPayment = createAsyncThunk('orders/verifyRazorpay', async (paymentData, { rejectWithValue, dispatch }) => {
+    try {
+        const result = await orderService.verifyRazorpayPayment(paymentData);
+        dispatch(clearCart());
+        return result;
+    } catch (error) {
+        return rejectWithValue(error.message);
+    }
+});
+
 const orderSlice = createSlice({
     name: 'order',
     initialState: {
@@ -85,6 +103,31 @@ const orderSlice = createSlice({
             })
             .addCase(fetchMyOrders.rejected, (state, action) => {
                 state.loading = false;
+                state.error = action.payload;
+            })
+            // Create Razorpay Order
+            .addCase(createRazorpayOrder.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(createRazorpayOrder.fulfilled, (state, action) => {
+                state.loading = false;
+                state.currentOrder = action.payload;
+            })
+            .addCase(createRazorpayOrder.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            // Verify Razorpay Payment
+            .addCase(verifyRazorpayPayment.pending, (state) => {
+                state.paymentStatus = 'processing';
+            })
+            .addCase(verifyRazorpayPayment.fulfilled, (state) => {
+                state.paymentStatus = 'success';
+                state.currentOrder = null;
+            })
+            .addCase(verifyRazorpayPayment.rejected, (state, action) => {
+                state.paymentStatus = 'failed';
                 state.error = action.payload;
             });
     }

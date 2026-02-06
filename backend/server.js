@@ -105,6 +105,7 @@ app.use('/api/finance', financialRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/paypal', require('./routes/paypalRoutes'));
+app.use('/api/razorpay', require('./routes/razorpayRoutes'));
 app.use('/api/deals', require('./routes/dealRoutes'));
 app.use('/api/translate', require('./routes/translationRoutes'));
 
