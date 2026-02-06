@@ -52,6 +52,12 @@ const createOrder = async (cart) => {
                 },
             },
         ],
+        application_context: {
+            brand_name: "PlusWay",
+            landing_page: "NO_PREFERENCE",
+            user_action: "PAY_NOW",
+            shipping_preference: "NO_SHIPPING" // Adjust if you want PayPal to handle shipping info
+        }
     };
 
     console.log("PayPal Request Payload:", JSON.stringify(payload, null, 2));
@@ -66,6 +72,7 @@ const createOrder = async (cart) => {
         data: JSON.stringify(payload),
     });
 
+    console.log("PayPal API Response Status:", response.status);
     const data = await handleResponse(response);
     console.log("PayPal Order Created Success:", data.id);
     return data;
