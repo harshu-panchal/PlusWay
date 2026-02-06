@@ -28,12 +28,8 @@ const Checkout = () => {
     const [selectedAddressId, setSelectedAddressId] = useState(null);
     const [isOrderCreated, setIsOrderCreated] = useState(false);
     const [paypalOrderId, setPaypalOrderId] = useState(null);
-<<<<<<< HEAD
-    const [dbOrderId, setDbOrderId] = useState(null);
-    const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
-=======
     // const [dbOrderId, setDbOrderId] = useState(null); // Moved to Ref to avoid re-renders during PayPal flow
->>>>>>> 0ff69c7a3dfecf9b3eab0ed464bcc65118c3bbec
+    const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
     const [formData, setFormData] = useState({
         fullName: user?.name || '',
