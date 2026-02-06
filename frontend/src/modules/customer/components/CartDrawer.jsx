@@ -4,11 +4,12 @@ import { Dialog, Transition } from '@headlessui/react';
 import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { closeCart, updateCartItem, removeCartItem } from '../store/slices/cartSlice';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../../shared/components/ui/Button';
 
 const CartDrawer = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { items, totalAmount, isOpen, loading } = useSelector((state) => state.cart);
 
     const handleUpdateQuantity = (itemId, newQty) => {
@@ -152,13 +153,15 @@ const CartDrawer = () => {
                                                 </div>
                                                 <p className="mt-0.5 text-sm text-gray-500 mb-6">Shipping and taxes calculated at checkout.</p>
                                                 <div className="space-y-3">
-                                                    <Link
-                                                        to="/checkout"
-                                                        onClick={() => dispatch(closeCart())}
+                                                    <button
+                                                        onClick={() => {
+                                                            dispatch(closeCart());
+                                                            navigate('/checkout');
+                                                        }}
                                                         className="flex items-center justify-center rounded-xl border border-transparent bg-teal-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-teal-700 w-full"
                                                     >
                                                         Checkout
-                                                    </Link>
+                                                    </button>
                                                     <button
                                                         type="button"
                                                         className="flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 w-full"

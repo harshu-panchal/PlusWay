@@ -48,6 +48,46 @@ export const orderService = {
         return await response.json();
     },
 
+    createRazorpayOrder: async (shippingAddress) => {
+        const body = {
+            ...getIdentifyParams(),
+            shippingAddress
+        };
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+        };
+        const response = await fetch(`${API_URL}/razorpay/create`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to create Razorpay order');
+        }
+        return await response.json();
+    },
+
+    verifyRazorpayPayment: async (paymentData) => {
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+        };
+        const response = await fetch(`${API_URL}/razorpay/verify`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(paymentData),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Razorpay payment verification failed');
+        }
+        return await response.json();
+    },
+
     getMyOrders: async () => {
         const token = localStorage.getItem('token');
         const headers = {

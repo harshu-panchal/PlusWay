@@ -2,6 +2,8 @@ const paypal = require('../services/paypalService');
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Transaction = require('../models/Transaction');
+const razorpayService = require('../services/razorpayService');
+const crypto = require('crypto');
 
 // Create Order (Initialize PayPal Payment)
 exports.createOrder = async (req, res) => {
@@ -153,6 +155,152 @@ exports.verifyPayment = async (req, res) => {
 
     } catch (error) {
         console.error('Capture PayPal Payment Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Create Razorpay Order
+exports.createRazorpayOrder = async (req, res) => {
+    try {
+        const { shippingAddress, guestId } = req.body;
+        const userId = req.user ? req.user._id : req.body.userId;
+
+        console.log('--- Create Razorpay Order Request ---');
+
+        if (!userId && !guestId) {
+            return res.status(400).json({ error: 'User identification required' });
+        }
+
+        // Fetch Cart
+        let cart = null;
+        if (userId) {
+            cart = await Cart.findOne({ user: userId }).populate('items.product');
+        }
+
+        if ((!cart || cart.items.length === 0) && guestId) {
+            const guestCart = await Cart.findOne({ guestId }).populate('items.product');
+            if (guestCart && guestCart.items.length > 0) {
+                cart = guestCart;
+            }
+        }
+
+        if (!cart || cart.items.length === 0) {
+            return res.status(400).json({ error: 'Cart is empty' });
+        }
+
+        // Calculate Total
+        let totalAmount = 0;
+        const orderItems = [];
+
+        for (const item of cart.items) {
+            if (!item.product) continue;
+            const itemObj = item.toObject();
+            const price = itemObj.variant?.price || itemObj.product?.discountPrice || itemObj.product?.basePrice;
+
+            if (price === undefined || price === null) continue;
+
+            totalAmount += price * itemObj.quantity;
+            orderItems.push({
+                product: itemObj.product._id,
+                quantity: itemObj.quantity,
+                price: price,
+                variant: itemObj.variant ? {
+                    sku: itemObj.variant.sku,
+                    name: itemObj.variant.name,
+                    price: itemObj.variant.price
+                } : undefined
+            });
+        }
+
+        if (totalAmount <= 0) {
+            return res.status(400).json({ error: 'Order total cannot be zero.' });
+        }
+
+        console.log(`Amount (INR): ${totalAmount}`);
+
+        // Create Razorpay Order
+        const razorpayOrder = await razorpayService.createOrder(totalAmount);
+
+        const newOrder = new Order({
+            user: userId || undefined,
+            guestId: userId ? undefined : guestId,
+            items: orderItems,
+            totalAmount,
+            shippingAddress,
+            paymentDetails: {
+                razorpay_order_id: razorpayOrder.id
+            },
+            paymentStatus: 'Pending'
+        });
+
+        await newOrder.save();
+
+        res.status(201).json({
+            id: newOrder._id,
+            razorpayOrderId: razorpayOrder.id,
+            amount: totalAmount,
+            currency: "INR",
+            key_id: process.env.RAZORPAY_KEY_ID
+        });
+
+    } catch (error) {
+        console.error('Create Razorpay Order Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Verify Razorpay Payment
+exports.verifyRazorpayPayment = async (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(body.toString())
+            .digest("hex");
+
+        const isAuthentic = expectedSignature === razorpay_signature;
+
+        if (isAuthentic) {
+            const order = await Order.findById(orderId);
+
+            if (!order) {
+                return res.status(404).json({ error: 'Order not found' });
+            }
+
+            order.paymentDetails.razorpay_payment_id = razorpay_payment_id;
+            order.paymentDetails.razorpay_signature = razorpay_signature;
+            order.paymentStatus = 'Paid';
+            await order.save();
+
+            // Create Transaction Record
+            await Transaction.create({
+                orderId: order._id,
+                transactionId: razorpay_payment_id,
+                amount: order.totalAmount,
+                status: 'success',
+                breakdown: {
+                    subtotal: order.totalAmount,
+                    platformFee: 0
+                }
+            });
+
+            // Clear Cart
+            if (order.user) {
+                await Cart.findOneAndDelete({ user: order.user });
+            } else if (order.guestId) {
+                await Cart.findOneAndDelete({ guestId: order.guestId });
+            }
+
+            res.json({ success: true, message: 'Payment verified successfully' });
+        } else {
+            res.status(400).json({ success: false, error: 'Invalid signature' });
+        }
+
+    } catch (error) {
+        console.error('Verify Razorpay Payment Error:', error);
         res.status(500).json({ error: error.message });
     }
 };
