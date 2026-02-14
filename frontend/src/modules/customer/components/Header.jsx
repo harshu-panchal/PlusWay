@@ -7,6 +7,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { openCart, fetchCart } from '../store/slices/cartSlice';
 import CartDrawer from './CartDrawer';
+import LanguageSelector from '../../../shared/components/ui/LanguageSelector';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -135,6 +136,9 @@ const Header = () => {
                                     <User className="w-3 h-3 text-teal-500" />
                                     <span>{user ? `Account: ${user.name.split(' ')[0]}` : 'Sign In'}</span>
                                 </Link>
+                                <div className="pl-4 border-l border-slate-700">
+                                    <LanguageSelector />
+                                </div>
                             </div>
                         </div>
                     </div>
