@@ -23,9 +23,9 @@ const Footer = () => {
                         <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Explore</h4>
                         <ul className="space-y-4 text-sm">
                             <li><Link to="/products" className="hover:text-teal-400 transition-colors">All Products</Link></li>
-                            <li><Link to="/categories" className="hover:text-teal-400 transition-colors">Categories</Link></li>
-                            <li><Link to="/promotions" className="hover:text-teal-400 transition-colors">Special Offers</Link></li>
-                            <li><Link to="/new-arrivals" className="hover:text-teal-400 transition-colors">New Arrivals</Link></li>
+                            <li><Link to="/news" className="hover:text-teal-400 transition-colors">Latest News</Link></li>
+                            <li><Link to="/promotion" className="hover:text-teal-400 transition-colors">Promotion</Link></li>
+                            <li><Link to="/partners" className="hover:text-teal-400 transition-colors">Partnership</Link></li>
                         </ul>
                     </div>
 
@@ -33,10 +33,10 @@ const Footer = () => {
                     <div>
                         <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Help & Support</h4>
                         <ul className="space-y-4 text-sm">
-                            <li><Link to="/shipping" className="hover:text-teal-400 transition-colors">Shipping Policy</Link></li>
-                            <li><Link to="/returns" className="hover:text-teal-400 transition-colors">Returns & Exchanges</Link></li>
-                            <li><Link to="/faq" className="hover:text-teal-400 transition-colors">FAQs</Link></li>
-                            <li><Link to="/contact" className="hover:text-teal-400 transition-colors">Contact Support</Link></li>
+                            <li><Link to="/delivery-payment" className="hover:text-teal-400 transition-colors">Shipping & Delivery</Link></li>
+                            <li><Link to="/warranty" className="hover:text-teal-400 transition-colors">Warranty Policy</Link></li>
+                            <li><Link to="/contacts" className="hover:text-teal-400 transition-colors">Contact Support</Link></li>
+                            <li><Link to="/receipts" className="hover:text-teal-400 transition-colors">Invoices & Receipts</Link></li>
                         </ul>
                     </div>
 

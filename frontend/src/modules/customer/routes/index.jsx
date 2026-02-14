@@ -22,6 +22,15 @@ const Profile = lazy(() => import('../pages/Profile'));
 const OrderSuccess = lazy(() => import('../pages/OrderSuccess'));
 const Wishlist = lazy(() => import('../pages/Wishlist'));
 
+// Informational Pages (Lazy)
+const Partners = lazy(() => import('../pages/Partners'));
+const Warranty = lazy(() => import('../pages/Warranty'));
+const DeliveryPayment = lazy(() => import('../pages/DeliveryPayment'));
+const Contacts = lazy(() => import('../pages/Contacts'));
+const News = lazy(() => import('../pages/News'));
+const Promotion = lazy(() => import('../pages/Promotion'));
+const Receipts = lazy(() => import('../pages/Receipts'));
+
 const CustomerRoutes = () => {
     return (
         <Suspense fallback={<Loader fullScreen />}>
@@ -48,6 +57,15 @@ const CustomerRoutes = () => {
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/wishlist" element={<Wishlist />} />
                     </Route>
+
+                    {/* Informational Routes */}
+                    <Route path="/partners" element={<Partners />} />
+                    <Route path="/warranty" element={<Warranty />} />
+                    <Route path="/delivery-payment" element={<DeliveryPayment />} />
+                    <Route path="/contacts" element={<Contacts />} />
+                    <Route path="/news" element={<News />} />
+                    <Route path="/promotion" element={<Promotion />} />
+                    <Route path="/receipts" element={<Receipts />} />
 
                     {/* Dynamic Category Routes - Last for lowest priority */}
                     <Route path="/:category" element={<ProductListing />} />

@@ -36,6 +36,7 @@ const ProductDetail = () => {
 
     const [relatedProducts, setRelatedProducts] = useState([]);
 
+    // Simplified re-fetch reviews trigger
     useEffect(() => {
         const fetchReviews = async () => {
             if (!product?._id) return;
@@ -47,27 +48,10 @@ const ProductDetail = () => {
             }
         };
 
-        const checkWishlist = async () => {
-            if (!product?._id) return;
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) return; // Not logged in
-
-                const res = await axios.get(`${API_URL}/wishlist`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const exists = res.data.data.some(p => p._id === product._id);
-                setIsWishlisted(exists);
-            } catch (err) {
-                // console.error("Failed to check wishlist", err);
-            }
-        };
-
-        if (product?._id) {
+        if (product?._id && refreshReviews > 0) {
             fetchReviews();
-            checkWishlist();
         }
-    }, [product?._id, refreshReviews]); // Run when product changes or refresh triggered
+    }, [product?._id, refreshReviews]);
 
     const navigate = useNavigate();
 
@@ -95,39 +79,71 @@ const ProductDetail = () => {
     };
 
     useEffect(() => {
-        const fetchProduct = async () => {
+        const fetchAllData = async () => {
             try {
-                // Fetch by slug OR id
-                let data;
+                setLoading(true);
+                // 1. Fetch main product data first as we need the ID for other requests
+                let productData;
                 const isId = /^[0-9a-fA-F]{24}$/.test(slug);
 
                 if (isId) {
-                    data = await productService.getProductById(slug);
+                    productData = await productService.getProductById(slug);
                 } else {
-                    data = await productService.getProductBySlug(slug);
+                    productData = await productService.getProductBySlug(slug);
                 }
-                setProduct(data);
+
+                setProduct(productData);
+
                 // Auto-select first variant if exists
-                if (data.hasVariants && data.variants.length > 0) {
-                    setSelectedVariant(data.variants[0]);
+                if (productData.hasVariants && productData.variants.length > 0) {
+                    setSelectedVariant(productData.variants[0]);
                 } else {
                     setSelectedVariant(null);
                 }
-                setActiveImage(0); // Reset image on product change
+                setActiveImage(0);
 
-                // Fetch Related Products (Recommendations)
-                if (data._id) {
-                    const relatedRes = await axios.get(`${API_URL}/products/${data._id}/recommendations`);
-                    setRelatedProducts(relatedRes.data);
+                // 2. Parallelize everything else that depends on product ID
+                if (productData._id) {
+                    const token = localStorage.getItem('token');
+
+                    const promises = [
+                        axios.get(`${API_URL}/reviews/product/${productData._id}`),
+                        axios.get(`${API_URL}/products/${productData._id}/recommendations`)
+                    ];
+
+                    if (token) {
+                        promises.push(axios.get(`${API_URL}/wishlist`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        }));
+                    }
+
+                    const results = await Promise.allSettled(promises);
+
+                    // Handle reviews result
+                    if (results[0].status === 'fulfilled') {
+                        setReviews(results[0].value.data.data);
+                    }
+
+                    // Handle recommendations result
+                    if (results[1].status === 'fulfilled') {
+                        setRelatedProducts(results[1].value.data);
+                    }
+
+                    // Handle wishlist result
+                    if (token && results[2]?.status === 'fulfilled') {
+                        const exists = results[2].value.data.data.some(p => p._id === productData._id);
+                        setIsWishlisted(exists);
+                    }
                 }
 
             } catch (error) {
-                console.error(error);
+                console.error("Error fetching product data:", error);
             } finally {
                 setLoading(false);
             }
         };
-        if (slug) fetchProduct();
+
+        if (slug) fetchAllData();
     }, [slug]);
 
     if (loading) return <div className="text-center py-20 animate-pulse">Loading product details...</div>;

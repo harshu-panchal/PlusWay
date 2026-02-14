@@ -110,14 +110,16 @@ exports.getProducts = async (req, res) => {
         else sortOption.createdAt = -1; // Default to newest
 
 
-        const total = await Product.countDocuments(query);
-        const products = await Product.find(query)
-            .sort(sortOption)
-            .populate('category')
-            .populate('rootCategory')
-            .skip((page - 1) * limit)
-            .limit(parseInt(limit))
-            .lean();
+        const [total, products] = await Promise.all([
+            Product.countDocuments(query),
+            Product.find(query)
+                .sort(sortOption)
+                .populate('category')
+                .populate('rootCategory')
+                .skip((page - 1) * limit)
+                .limit(parseInt(limit))
+                .lean()
+        ]);
 
         res.json({
             products,
