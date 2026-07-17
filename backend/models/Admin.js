@@ -25,6 +25,14 @@ const adminSchema = new mongoose.Schema({
         type: String,
         default: 'admin'
     },
+    fcmTokens: {
+        type: [String],
+        default: []
+    },
+    fcmTokenMobile: {
+        type: [String],
+        default: []
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -41,6 +41,14 @@ const deliveryBoySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    fcmTokens: {
+        type: [String],
+        default: []
+    },
+    fcmTokenMobile: {
+        type: [String],
+        default: []
+    },
     createdAt: {
         type: Date,
         default: Date.now

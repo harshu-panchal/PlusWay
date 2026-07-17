@@ -87,6 +87,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const authRoutes = require('./routes/authRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const financialRoutes = require('./routes/financialRoutes');
+const fcmTokenRoutes = require('./routes/fcmTokenRoutes');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
@@ -108,6 +109,7 @@ app.use('/api/paypal', require('./routes/paypalRoutes'));
 app.use('/api/razorpay', require('./routes/razorpayRoutes'));
 app.use('/api/deals', require('./routes/dealRoutes'));
 app.use('/api/translate', require('./routes/translationRoutes'));
+app.use('/api/fcm-tokens', fcmTokenRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

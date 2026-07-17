@@ -6,6 +6,7 @@ import { fetchCart } from "./modules/customer/store/slices/cartSlice";
 import { checkAuth } from "./store/authSlice";
 import Loader from "./shared/components/ui/Loader";
 import ScrollToTop from "./shared/components/ScrollToTop";
+import { initializePushNotifications, registerFCMToken } from "./services/pushNotificationService";
 
 // Lazy load modules
 const CustomerRoutes = lazy(() => import("./modules/customer/routes"));
@@ -27,8 +28,15 @@ function App() {
     // Fetch wishlist only if user is authenticated
     if (isAuthenticated) {
       dispatch(fetchWishlist());
+      
+      registerFCMToken().catch(console.error);
     }
   }, [dispatch, isAuthenticated]);
+
+  useEffect(() => {
+    // Initialize push notifications background/foreground handlers
+    initializePushNotifications();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
