@@ -34,7 +34,7 @@ const ProductList = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch(`${API_URL}/categories`);
+                const response = await fetch(`${API_URL}/categories`, { headers: adminAuthHeaders() });
                 const data = await response.json();
                 // Flatten or just take roots? Assuming list of categories.
                 // If nested, we might need to handle that, but let's assume flat or root list for now.

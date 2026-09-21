@@ -1,4 +1,5 @@
 const Category = require('../models/Category');
+const { isAdminRequest, getHiddenCategoryIds } = require('../utils/brandVisibility');
 
 // Helper to generate slug
 const generateSlug = (name) => {
@@ -32,7 +33,12 @@ exports.createCategory = async (req, res) => {
 exports.getCategories = async (req, res) => {
     try {
         // For now return flat list, tree conversion can happen on frontend or here
-        const categories = await Category.find().sort({ level: 1, order: 1 });
+        let categories = await Category.find().sort({ level: 1, order: 1 });
+        // Inactive categories (and their subcategories) are only returned to admins
+        if (!isAdminRequest(req)) {
+            const hidden = await getHiddenCategoryIds();
+            categories = categories.filter((c) => !hidden.has(String(c._id)));
+        }
         res.json(categories);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -42,7 +48,7 @@ exports.getCategories = async (req, res) => {
 exports.getCategoryById = async (req, res) => {
     try {
         const category = await Category.findById(req.params.id);
-        if (!category) return res.status(404).json({ error: 'Category not found' });
+        if (!category || (!isAdminRequest(req) && (await getHiddenCategoryIds()).has(String(category._id)))) return res.status(404).json({ error: 'Category not found' });
         res.json(category);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -79,10 +85,13 @@ exports.getCategoryBySlug = async (req, res) => {
         const category = await Category.findOne({ slug: req.params.slug });
         if (!category) return res.status(404).json({ error: 'Category not found' });
 
+        const hidden = isAdminRequest(req) ? new Set() : await getHiddenCategoryIds();
+        if (hidden.has(String(category._id))) return res.status(404).json({ error: 'Category not found' });
+
         const breadcrumbs = await buildHierarchy(category);
 
         // Find children (sub-categories)
-        const children = await Category.find({ parent: category._id });
+        const children = (await Category.find({ parent: category._id })).filter((c) => !hidden.has(String(c._id)));
 
         res.json({
             category,

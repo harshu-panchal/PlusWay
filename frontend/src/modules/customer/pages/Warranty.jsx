@@ -72,7 +72,7 @@ const Warranty = () => {
                             <p className="text-sm text-slate-600">Keep your original order receipt and clear photos of the defect.</p>
 
                             <p className="font-medium text-slate-900">Step 2: Contact Support</p>
-                            <p className="text-sm text-slate-600">Email us at support@plusway.com with your order number and issue description.</p>
+                            <p className="text-sm text-slate-600">Email us at plusway9@gmail.com with your order number and issue description.</p>
 
                             <p className="font-medium text-slate-900">Step 3: Evaluation</p>
                             <p className="text-sm text-slate-600">Our team will review your claim and provide shipping instructions if a return is required.</p>

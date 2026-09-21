@@ -1,4 +1,5 @@
 const Brand = require('../models/Brand');
+const Category = require('../models/Category');
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -8,6 +9,24 @@ const isAdminRequest = (req) => !!(req.user && req.user.role === 'admin');
 const getHiddenBrandNames = async () => {
     const hidden = await Brand.find({ isActive: false }).select('name').lean();
     return hidden.map((b) => b.name.trim().toLowerCase());
+};
+
+// Ids (strings) of inactive categories plus everything nested beneath them
+const getHiddenCategoryIds = async () => {
+    const all = await Category.find().select('_id parent isActive').lean();
+    const hidden = new Set(all.filter((c) => c.isActive === false).map((c) => String(c._id)));
+    if (hidden.size === 0) return hidden;
+    let grew = true;
+    while (grew) {
+        grew = false;
+        for (const c of all) {
+            if (c.parent && hidden.has(String(c.parent)) && !hidden.has(String(c._id))) {
+                hidden.add(String(c._id));
+                grew = true;
+            }
+        }
+    }
+    return hidden;
 };
 
 /**
@@ -30,6 +49,10 @@ const applyBrandVisibility = async (query, req) => {
     if (condition) {
         query.$nor = [...(query.$nor || []), condition];
     }
+    const hiddenCategories = [...await getHiddenCategoryIds()];
+    if (hiddenCategories.length > 0) {
+        query.$nor = [...(query.$nor || []), { category: { $in: hiddenCategories } }, { rootCategory: { $in: hiddenCategories } }];
+    }
     return query;
 };
 
@@ -41,12 +64,15 @@ const getProductBrand = (product) => {
 };
 
 // Single-document check (works for lean objects and mongoose documents)
+const refId = (ref) => (ref ? String(ref._id || ref) : null);
+
 const isProductHidden = async (product, req) => {
     if (isAdminRequest(req)) return false;
     const brand = getProductBrand(product);
-    if (!brand) return false;
-    const names = await getHiddenBrandNames();
-    return names.includes(brand);
+    if (brand && (await getHiddenBrandNames()).includes(brand)) return true;
+    const hiddenCategories = await getHiddenCategoryIds();
+    return hiddenCategories.size > 0 &&
+        [refId(product.category), refId(product.rootCategory)].some((id) => id && hiddenCategories.has(id));
 };
 
-module.exports = { isAdminRequest, applyBrandVisibility, isProductHidden, getHiddenBrandNames, getProductBrand };
+module.exports = { isAdminRequest, applyBrandVisibility, isProductHidden, getHiddenBrandNames, getProductBrand, getHiddenCategoryIds };

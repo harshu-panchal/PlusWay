@@ -16,7 +16,7 @@ const faqs = [
     },
     {
         q: 'I forgot my password.',
-        a: 'Email support@plusway.com from your registered address and we will help you regain access.',
+        a: 'Email plusway9@gmail.com from your registered address and we will help you regain access.',
     },
     {
         q: 'How do I delete my account?',
@@ -40,7 +40,7 @@ const Support = () => (
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                     <Mail className="w-6 h-6 text-blue-600 mb-3" />
                     <h3 className="font-bold mb-1">Email</h3>
-                    <a href="mailto:support@plusway.com" className="text-blue-600 font-semibold hover:underline">support@plusway.com</a>
+                    <a href="mailto:plusway9@gmail.com" className="text-blue-600 font-semibold hover:underline">plusway9@gmail.com</a>
                     <p className="text-sm text-slate-500 mt-1">We reply within 24 hours.</p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">

@@ -6,6 +6,7 @@ const categorySchema = new mongoose.Schema({
     parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null }, // Self-referencing for infinite depth
     level: { type: Number, default: 0 }, // 0 = Root (e.g. Glass), 1 = Brand (Apple), 2 = Model (iPhone 13)
     icon: { type: String }, // URL for the icon grid
+    isActive: { type: Boolean, default: true }, // Inactive categories (and their subtree/products) are hidden from the storefront
     isFeatured: { type: Boolean, default: false }, // Show on homepage
     order: { type: Number, default: 0 },
     filterableAttributes: [{ type: String }] // e.g. ["Material", "Hardness", "Interface"]

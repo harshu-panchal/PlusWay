@@ -4,6 +4,7 @@ import Button from '../../../../shared/components/ui/Button';
 import Modal from '../../../../shared/components/ui/Modal';
 import Badge from '../../../../shared/components/ui/Badge';
 import CategoryForm from './CategoryForm';
+import { adminAuthHeaders } from '../../utils/authHeaders';
 import { Plus, Edit, Trash, FolderTree, FolderPlus, ChevronRight, ChevronDown, Search, MoreVertical } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -18,7 +19,7 @@ const CategoryList = () => {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch(`${API_URL}/categories`);
+            const response = await fetch(`${API_URL}/categories`, { headers: adminAuthHeaders() });
             if (response.ok) {
                 const data = await response.json();
 
@@ -101,6 +102,25 @@ const CategoryList = () => {
         } catch (error) {
             console.error('Failed to save category', error);
             alert('An unexpected error occurred');
+        }
+    };
+
+    const handleToggleActive = async (category) => {
+        const isActive = category.isActive === false;
+        const previous = categories;
+        // Optimistic update; rolled back if the request fails
+        setCategories(prev => prev.map(c => c._id === category._id ? { ...c, isActive } : c));
+        try {
+            const response = await fetch(`${API_URL}/categories/${category._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', ...adminAuthHeaders() },
+                body: JSON.stringify({ isActive })
+            });
+            if (!response.ok) throw new Error('Request failed');
+        } catch (error) {
+            console.error('Failed to update category status', error);
+            setCategories(previous);
+            alert('Failed to update category status');
         }
     };
 
@@ -232,7 +252,24 @@ const CategoryList = () => {
                                             </code>
                                         </td>
                                         <td className="py-4 px-6">
-                                            <Badge variant="success" size="sm">Active</Badge>
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    type="button"
+                                                    role="switch"
+                                                    aria-checked={category.isActive !== false}
+                                                    aria-label={`Toggle ${category.name} active`}
+                                                    onClick={() => handleToggleActive(category)}
+                                                    title={category.isActive !== false
+                                                        ? 'Deactivate (hides this category, its subcategories and products from customers)'
+                                                        : 'Activate'}
+                                                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${category.isActive !== false ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                                                >
+                                                    <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${category.isActive !== false ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                                                </button>
+                                                <Badge variant={category.isActive !== false ? 'success' : 'warning'} size="sm">
+                                                    {category.isActive !== false ? 'Active' : 'Inactive'}
+                                                </Badge>
+                                            </div>
                                         </td>
                                         <td className="py-4 px-6 text-right">
                                             <div className="relative flex justify-end items-center min-h-[32px]">

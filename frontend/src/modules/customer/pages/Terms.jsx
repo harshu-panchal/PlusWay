@@ -37,7 +37,7 @@ const sections = [
     },
     {
         title: '9. Contact',
-        body: 'Questions about these terms can be sent to support@plusway.com.',
+        body: 'Questions about these terms can be sent to plusway9@gmail.com.',
     },
 ];
 

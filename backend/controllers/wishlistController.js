@@ -1,6 +1,6 @@
 const Wishlist = require('../models/Wishlist');
 const Product = require('../models/Product');
-const { isProductHidden, getHiddenBrandNames, getProductBrand } = require('../utils/brandVisibility');
+const { isProductHidden } = require('../utils/brandVisibility');
 
 // @desc    Get my wishlist
 // @route   GET /api/wishlist
@@ -8,14 +8,14 @@ const { isProductHidden, getHiddenBrandNames, getProductBrand } = require('../ut
 exports.getWishlist = async (req, res) => {
     try {
         let wishlist = await Wishlist.findOne({ user: req.user._id })
-            .populate('products', 'title basePrice mainImage slug hasVariants isOutOfStock attributes'); // populate minimal fields
+            .populate('products', 'title basePrice mainImage slug hasVariants isOutOfStock attributes category rootCategory'); // populate minimal fields
 
         if (!wishlist) {
             wishlist = await Wishlist.create({ user: req.user._id, products: [] });
         }
 
-        const hiddenBrands = await getHiddenBrandNames();
-        const products = wishlist.products.filter((p) => !hiddenBrands.includes(getProductBrand(p)));
+        const visibility = await Promise.all(wishlist.products.map(async (p) => !(await isProductHidden(p, req))));
+        const products = wishlist.products.filter((_, idx) => visibility[idx]);
 
         res.status(200).json({ success: true, count: products.length, data: products });
     } catch (error) {

@@ -49,7 +49,7 @@ const Footer = () => {
                                 <span className="text-white font-medium">+91 98701 62128</span>
                             </li>
                             <li className="flex items-center gap-3">
-                                <span>support@plusway.com</span>
+                                <span>plusway9@gmail.com</span>
                             </li>
                             <li>
                                 <p className="leading-relaxed">Mumbai, Maharashtra, India</p>

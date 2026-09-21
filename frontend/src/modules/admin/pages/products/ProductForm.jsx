@@ -42,7 +42,7 @@ const ProductForm = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch(`${API_URL}/categories`);
+                const response = await fetch(`${API_URL}/categories`, { headers: adminAuthHeaders() });
                 const data = await response.json();
                 setCategories(data);
             } catch (error) {

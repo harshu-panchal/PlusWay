@@ -1,6 +1,6 @@
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
-const { isProductHidden, getHiddenBrandNames, getProductBrand } = require("../utils/brandVisibility");
+const { isProductHidden } = require("../utils/brandVisibility");
 
 // Helper to find cart
 const getCartObj = async (req) => {
@@ -29,16 +29,14 @@ exports.getCart = async (req, res) => {
 
     if (!cart) return res.json({ items: [] });
 
-    // Drop items whose brand has been hidden so they cannot reach checkout
-    const hiddenBrands = await getHiddenBrandNames();
-    if (hiddenBrands.length > 0) {
-      const visibleItems = cart.items.filter(
-        (i) => !i.product || !hiddenBrands.includes(getProductBrand(i.product))
-      );
-      if (visibleItems.length !== cart.items.length) {
-        cart.items = visibleItems;
-        await cart.save();
-      }
+    // Drop items whose brand or category has been hidden so they cannot reach checkout
+    const visibility = await Promise.all(
+      cart.items.map(async (i) => !i.product || !(await isProductHidden(i.product, req)))
+    );
+    const visibleItems = cart.items.filter((_, idx) => visibility[idx]);
+    if (visibleItems.length !== cart.items.length) {
+      cart.items = visibleItems;
+      await cart.save();
     }
     res.json(cart);
   } catch (err) {
