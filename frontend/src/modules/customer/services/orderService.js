@@ -30,6 +30,28 @@ export const orderService = {
         return await response.json();
     },
 
+    createCodOrder: async (shippingAddress) => {
+        const body = {
+            ...getIdentifyParams(),
+            shippingAddress
+        };
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+        };
+        const response = await fetch(`${API_URL}/orders/create-cod`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to place order');
+        }
+        return await response.json();
+    },
+
     verifyPayment: async (paymentData) => {
         const token = localStorage.getItem('token');
         const headers = {

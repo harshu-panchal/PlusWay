@@ -4,6 +4,7 @@ const Cart = require('../models/Cart');
 const Transaction = require('../models/Transaction');
 const razorpayService = require('../services/razorpayService');
 const crypto = require('crypto');
+const { isProductHidden } = require('../utils/brandVisibility');
 
 // Create Order (Initialize PayPal Payment)
 exports.createOrder = async (req, res) => {
@@ -305,6 +306,89 @@ exports.verifyRazorpayPayment = async (req, res) => {
     }
 };
 
+// Place a Cash on Delivery order (no online payment; paid to the delivery person)
+// @route   POST /api/orders/create-cod
+exports.createCodOrder = async (req, res) => {
+    try {
+        const { shippingAddress, guestId } = req.body;
+        const userId = req.user ? req.user._id : undefined;
+
+        if (!userId && !guestId) {
+            return res.status(400).json({ error: 'User identification required' });
+        }
+
+        const required = ['fullName', 'phone', 'addressLine', 'city', 'state', 'zipCode'];
+        if (!shippingAddress || required.some((f) => !String(shippingAddress[f] || '').trim())) {
+            return res.status(400).json({ error: 'Please provide complete shipping details' });
+        }
+
+        let cart = null;
+        if (userId) {
+            cart = await Cart.findOne({ user: userId }).populate('items.product');
+        } else {
+            cart = await Cart.findOne({ guestId }).populate('items.product');
+        }
+
+        if (!cart || cart.items.length === 0) {
+            return res.status(400).json({ error: 'Cart is empty' });
+        }
+
+        // Prices always come from the database, never from the client
+        let totalAmount = 0;
+        const orderItems = [];
+
+        for (const item of cart.items) {
+            if (!item.product) continue;
+            if (await isProductHidden(item.product, req)) {
+                return res.status(400).json({ error: `"${item.product.title}" is no longer available. Please remove it from your cart.` });
+            }
+            const itemObj = item.toObject();
+            const price = itemObj.variant?.price || itemObj.product?.discountPrice || itemObj.product?.basePrice;
+
+            if (price === undefined || price === null) continue;
+
+            totalAmount += price * itemObj.quantity;
+            orderItems.push({
+                product: itemObj.product._id,
+                quantity: itemObj.quantity,
+                price,
+                variant: itemObj.variant ? {
+                    sku: itemObj.variant.sku,
+                    name: itemObj.variant.name,
+                    price: itemObj.variant.price
+                } : undefined
+            });
+        }
+
+        if (totalAmount <= 0) {
+            return res.status(400).json({ error: 'Order total cannot be zero.' });
+        }
+
+        const order = await Order.create({
+            user: userId,
+            guestId: userId ? undefined : guestId,
+            items: orderItems,
+            totalAmount,
+            shippingAddress,
+            paymentMethod: 'COD',
+            paymentStatus: 'Pending'
+        });
+
+        await Cart.deleteOne({ _id: cart._id });
+
+        res.status(201).json({
+            success: true,
+            id: order._id,
+            amount: totalAmount,
+            currency: 'INR',
+            paymentMethod: 'COD'
+        });
+    } catch (error) {
+        console.error('Create COD Order Error:', error);
+        res.status(error.name === 'ValidationError' ? 400 : 500).json({ error: error.message });
+    }
+};
+
 // Get My Orders
 exports.getMyOrders = async (req, res) => {
     try {
@@ -499,6 +583,21 @@ exports.updateOrderStatus = async (req, res) => {
         if (status === 'Delivered') {
             order.deliveredAt = Date.now();
             order.paymentStatus = 'Paid'; // Assume COD is paid on delivery, or online was already paid
+
+            // COD cash is collected on delivery, so that is when the revenue record is created
+            if (order.paymentMethod === 'COD') {
+                const transactionId = `COD-${order._id}`;
+                if (!(await Transaction.exists({ transactionId }))) {
+                    await Transaction.create({
+                        orderId: order._id,
+                        transactionId,
+                        amount: order.totalAmount,
+                        status: 'success',
+                        paymentMethod: 'COD',
+                        breakdown: { subtotal: order.totalAmount, platformFee: 0 }
+                    });
+                }
+            }
         }
 
         const updatedOrder = await order.save();

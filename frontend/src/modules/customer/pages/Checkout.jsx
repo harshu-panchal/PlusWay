@@ -2,18 +2,20 @@ import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { createOrder, verifyPayment, createRazorpayOrder, verifyRazorpayPayment } from '../store/slices/orderSlice';
+import { placeCodOrder } from '../store/slices/orderSlice';
+// Online payments are disabled for now (Cash on Delivery only). To re-enable, restore the commented code below
+// and import { createOrder, verifyPayment, createRazorpayOrder, verifyRazorpayPayment } from '../store/slices/orderSlice'.
 import Button from '../../../shared/components/ui/Button';
-import { Loader2, ShieldCheck, MapPin, CheckCircle } from 'lucide-react';
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { Loader2, ShieldCheck, Banknote } from 'lucide-react';
+// import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-import { useRef } from 'react';
+// import { useRef } from 'react';
 
-const initialOptions = {
-    "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "sb",
-    currency: "USD",
-    intent: "capture",
-};
+// const initialOptions = {
+//     "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "sb",
+//     currency: "USD",
+//     intent: "capture",
+// };
 
 const Checkout = () => {
     const dispatch = useDispatch();
@@ -22,14 +24,14 @@ const Checkout = () => {
     const { loading: orderLoading } = useSelector((state) => state.order);
     const { user } = useSelector((state) => state.auth);
 
-    const dbOrderIdRef = useRef(null);
+    // const dbOrderIdRef = useRef(null);
 
     const [savedAddresses, setSavedAddresses] = useState([]);
     const [selectedAddressId, setSelectedAddressId] = useState(null);
-    const [isOrderCreated, setIsOrderCreated] = useState(false);
-    const [paypalOrderId, setPaypalOrderId] = useState(null);
+    // const [isOrderCreated, setIsOrderCreated] = useState(false);
+    // const [paypalOrderId, setPaypalOrderId] = useState(null);
     // const [dbOrderId, setDbOrderId] = useState(null); // Moved to Ref to avoid re-renders during PayPal flow
-    const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
+    // const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
     const [formData, setFormData] = useState({
         fullName: user?.name || '',
@@ -77,6 +79,7 @@ const Checkout = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    /* --- Online payments (PayPal / Razorpay) - disabled, Cash on Delivery only ---
     useEffect(() => {
         console.log("PayPal Configuration:", {
             clientId: initialOptions["client-id"],
@@ -181,9 +184,30 @@ const Checkout = () => {
         loadRazorpay();
         // Cleanup not strictly necessary for global script but good practice if SPA unmounts heavily
     }, []);
+    --- end online payments --- */
+
+    // Cash on Delivery
+    const handlePlaceCodOrder = async () => {
+        if (!formData.fullName || !formData.phone || !formData.addressLine || !formData.city || !formData.state || !formData.zipCode) {
+            alert("Please fill in all shipping details first.");
+            return;
+        }
+        if (items.length === 0) {
+            alert("Your cart is empty.");
+            return;
+        }
+
+        const result = await dispatch(placeCodOrder(formData));
+        if (placeCodOrder.fulfilled.match(result)) {
+            navigate('/order-success');
+        } else {
+            alert(result.payload || "Failed to place order. Please try again.");
+        }
+    };
 
     return (
-        <PayPalScriptProvider options={initialOptions}>
+        // <PayPalScriptProvider options={initialOptions}>
+        <>
             <div className="mx-4 lg:mx-[10%] py-6 sm:py-8 md:py-12">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Checkout</h1>
 
@@ -357,6 +381,24 @@ const Checkout = () => {
                             </div>
 
                             <div className="relative z-0 space-y-4">
+                                {/* Payment method: Cash on Delivery (only option for now) */}
+                                <div className="flex items-center gap-3 p-4 border-2 border-teal-500 bg-teal-50 rounded-lg">
+                                    <Banknote className="w-6 h-6 text-teal-600 shrink-0" />
+                                    <div>
+                                        <p className="font-semibold text-gray-900 text-sm sm:text-base">Cash on Delivery</p>
+                                        <p className="text-xs sm:text-sm text-gray-600">Pay in cash when your order arrives.</p>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={handlePlaceCodOrder}
+                                    disabled={orderLoading || items.length === 0}
+                                    className="w-full bg-teal-600 hover:bg-teal-700 disabled:opacity-60 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm"
+                                >
+                                    {orderLoading ? <Loader2 className="animate-spin" /> : `Place Order (COD) · ₹${totalAmount}`}
+                                </button>
+
+                                {/* --- Online payments (PayPal / Razorpay) - disabled, Cash on Delivery only ---
                                 <button
                                     onClick={handleRazorpayPayment}
                                     disabled={orderLoading}
@@ -430,17 +472,20 @@ const Checkout = () => {
                                         }
                                     }}
                                 />
+                                --- end online payments --- */}
                             </div>
 
                             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
                                 <ShieldCheck className="w-4 h-4" />
-                                Secure Payment via PayPal
+                                {/* Secure Payment via PayPal */}
+                                Pay in cash when your order is delivered
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </PayPalScriptProvider>
+        </>
+        // </PayPalScriptProvider>
     );
 };
 

@@ -53,6 +53,10 @@ const orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'DeliveryBoy'
     },
+    paymentMethod: {
+        type: String,
+        enum: ['COD', 'Razorpay', 'PayPal']
+    },
     paymentStatus: {
         type: String,
         enum: ['Pending', 'Paid', 'Failed'],

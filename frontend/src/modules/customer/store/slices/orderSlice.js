@@ -10,6 +10,17 @@ export const createOrder = createAsyncThunk('orders/create', async (shippingAddr
     }
 });
 
+// Cash on Delivery: the order is placed immediately, payment is collected on delivery
+export const placeCodOrder = createAsyncThunk('orders/placeCod', async (shippingAddress, { rejectWithValue, dispatch }) => {
+    try {
+        const result = await orderService.createCodOrder(shippingAddress);
+        dispatch(clearCart());
+        return result;
+    } catch (error) {
+        return rejectWithValue(error.message);
+    }
+});
+
 export const verifyPayment = createAsyncThunk('orders/verify', async (paymentData, { rejectWithValue, dispatch }) => {
     try {
         const result = await orderService.verifyPayment(paymentData);
@@ -77,6 +88,19 @@ const orderSlice = createSlice({
                 state.currentOrder = action.payload;
             })
             .addCase(createOrder.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            // Place COD Order
+            .addCase(placeCodOrder.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(placeCodOrder.fulfilled, (state) => {
+                state.loading = false;
+                state.currentOrder = null;
+            })
+            .addCase(placeCodOrder.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })
