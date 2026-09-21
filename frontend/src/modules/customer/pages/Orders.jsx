@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMyOrders } from '../store/slices/orderSlice';
-import { Package, Calendar, MapPin, ChevronRight, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Package, ChevronRight, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Orders = () => {
@@ -18,11 +18,17 @@ const Orders = () => {
         return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
+    const getPaymentLabel = (order) => {
+        if (order.paymentMethod === 'COD') return 'Cash on Delivery';
+        return order.paymentMethod || (order.paymentDetails?.razorpay_order_id ? 'Razorpay' : 'PayPal');
+    };
+
     // Status color helper
     const getStatusColor = (status) => {
         switch (status) {
             case 'Processing': return 'text-blue-600 bg-blue-50';
             case 'Shipped': return 'text-purple-600 bg-purple-50';
+            case 'Out for Delivery': return 'text-amber-600 bg-amber-50';
             case 'Delivered': return 'text-green-600 bg-green-50';
             case 'Cancelled': return 'text-red-600 bg-red-50';
             default: return 'text-gray-600 bg-gray-50';
@@ -66,83 +72,83 @@ const Orders = () => {
             ) : (
                 <div className="space-y-6">
                     {orders.map((order) => (
-                        <div key={order._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                        <div key={order._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                             {/* Order Header */}
-                            <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-                                <div className="flex flex-wrap gap-6">
-                                    <div>
-                                        <p className="text-xs text-gray-500 uppercase font-semibold">Order Placed</p>
-                                        <p className="text-sm font-medium text-gray-900">{formatDate(order.createdAt)}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 uppercase font-semibold">Total</p>
-                                        <p className="text-sm font-medium text-gray-900">₹{order.totalAmount}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 uppercase font-semibold">Ship To</p>
-                                        <div className="relative group cursor-pointer text-sm font-medium text-indigo-600">
-                                            {order.shippingAddress.fullName}
-                                            {/* Tooltip for full address could go here */}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3 sm:gap-4">
-                                    <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusColor(order.status)}`}>
+                            <div className="bg-gray-50 px-4 sm:px-6 py-4 border-b border-gray-100">
+                                <div className="flex items-center justify-between gap-3 mb-4">
+                                    <span className="text-sm font-semibold text-gray-900">
+                                        Order <span className="font-mono text-gray-500">#{order._id.slice(-8).toUpperCase()}</span>
+                                    </span>
+                                    <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider whitespace-nowrap ${getStatusColor(order.status)}`}>
                                         {order.status}
-                                    </div>
-                                    <span className="text-sm text-gray-500 font-mono">#{order._id.slice(-8).toUpperCase()}</span>
+                                    </span>
                                 </div>
+
+                                <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3">
+                                    <div>
+                                        <dt className="text-[11px] text-gray-500 uppercase font-semibold tracking-wide">Order Placed</dt>
+                                        <dd className="text-sm font-medium text-gray-900 mt-0.5">{formatDate(order.createdAt)}</dd>
+                                    </div>
+                                    <div>
+                                        <dt className="text-[11px] text-gray-500 uppercase font-semibold tracking-wide">Total</dt>
+                                        <dd className="text-sm font-bold text-gray-900 mt-0.5">₹{order.totalAmount}</dd>
+                                    </div>
+                                    <div className="min-w-0">
+                                        <dt className="text-[11px] text-gray-500 uppercase font-semibold tracking-wide">Ship To</dt>
+                                        <dd className="text-sm font-medium text-gray-900 mt-0.5 truncate">{order.shippingAddress?.fullName}</dd>
+                                    </div>
+                                    <div>
+                                        <dt className="text-[11px] text-gray-500 uppercase font-semibold tracking-wide">Payment</dt>
+                                        <dd className="text-sm font-medium text-gray-900 mt-0.5">{getPaymentLabel(order)}</dd>
+                                    </div>
+                                </dl>
                             </div>
 
                             {/* Order Items */}
-                            <div className="px-6 py-6">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1 space-y-6">
-                                        {order.items.map((item, index) => (
-                                            <div key={index} className="flex gap-4">
-                                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
-                                                    {item.product && item.product.images && item.product.images[0] ? (
-                                                        <img
-                                                            src={item.product.images[0]}
-                                                            alt={item.product.name}
-                                                            className="w-full h-full object-cover"
-                                                            loading="lazy"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                            <Package className="w-8 h-8" />
-                                                        </div>
-                                                    )}
+                            <div className="px-4 sm:px-6 divide-y divide-gray-100">
+                                {order.items.map((item, index) => (
+                                    <div key={index} className="flex gap-4 py-4">
+                                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
+                                            {item.product && (item.product.mainImage || item.product.images?.[0]) ? (
+                                                <img
+                                                    src={item.product.mainImage || item.product.images[0]}
+                                                    alt={item.product.title}
+                                                    className="w-full h-full object-contain"
+                                                    loading="lazy"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <Package className="w-8 h-8" />
                                                 </div>
-                                                <div className="flex-1">
-                                                    <h3 className="font-semibold text-gray-900">
-                                                        {item.product ? item.product.name : 'Product Unavailable'}
-                                                    </h3>
-                                                    {item.variant && (
-                                                        <p className="text-sm text-gray-500 mt-1">
-                                                            Variant: {item.variant.name}
-                                                        </p>
-                                                    )}
-                                                    <div className="flex items-center mt-2 text-sm text-gray-500">
-                                                        <span>Qty: {item.quantity}</span>
-                                                        <span className="mx-2">•</span>
-                                                        <span className="font-medium text-gray-900">₹{item.price}</span>
-                                                    </div>
-                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                                            <div>
+                                                <h3 className="text-sm sm:text-base font-semibold text-gray-900 line-clamp-2">
+                                                    {item.product ? item.product.title : 'Product Unavailable'}
+                                                </h3>
+                                                {item.variant?.name && (
+                                                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Variant: {item.variant.name}</p>
+                                                )}
                                             </div>
-                                        ))}
+                                            <div className="flex items-center justify-between mt-2 text-sm">
+                                                <span className="text-gray-500">Qty: {item.quantity}</span>
+                                                <span className="font-bold text-gray-900">₹{item.price * item.quantity}</span>
+                                            </div>
+                                        </div>
                                     </div>
+                                ))}
+                            </div>
 
-                                    {/* Action Button */}
-                                    <div className="ml-4 sm:ml-6 flex-shrink-0 self-center">
-                                        <Link
-                                            to={`/orders/${order._id}`}
-                                            className="flex items-center justify-center w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-300 shadow-sm text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 min-h-[44px]"
-                                        >
-                                            View Order Details
-                                        </Link>
-                                    </div>
-                                </div>
+                            {/* Actions */}
+                            <div className="px-4 sm:px-6 py-4 border-t border-gray-100 flex justify-end">
+                                <Link
+                                    to={`/orders/${order._id}`}
+                                    className="flex items-center justify-center gap-1 w-full sm:w-auto px-5 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 min-h-[44px] transition-colors"
+                                >
+                                    View Order Details
+                                    <ChevronRight className="w-4 h-4" />
+                                </Link>
                             </div>
                         </div>
                     ))}

@@ -87,7 +87,7 @@ const CustomerOrdersModal = ({ customer, isOpen, onClose }) => {
                                     {order.items.map((item, idx) => (
                                         <div key={idx} className="flex justify-between items-center text-sm">
                                             <span className="text-gray-600 truncate flex-1 mr-4">
-                                                {item.product?.name || 'Unknown Product'} {item.variant?.name && `(${item.variant.name})`} x {item.quantity}
+                                                {item.product?.title || 'Unknown Product'} {item.variant?.name && `(${item.variant.name})`} x {item.quantity}
                                             </span>
                                             <span className="font-medium">₹{item.price * item.quantity}</span>
                                         </div>

@@ -394,7 +394,7 @@ exports.getMyOrders = async (req, res) => {
     try {
         const orders = await Order.find({ user: req.user.id })
             .sort({ createdAt: -1 })
-            .populate('items.product', 'name images'); // Populate product details if needed
+            .populate('items.product', 'title mainImage images slug'); // Populate product details if needed
 
         res.json(orders);
     } catch (error) {
@@ -556,7 +556,7 @@ exports.getAllOrders = async (req, res) => {
 exports.getCustomerOrders = async (req, res) => {
     try {
         const orders = await Order.find({ user: req.params.id })
-            .populate('items.product', 'name images')
+            .populate('items.product', 'title mainImage images slug')
             .sort({ createdAt: -1 });
 
         res.status(200).json(orders);
