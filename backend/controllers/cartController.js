@@ -1,5 +1,6 @@
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
+const { isProductHidden, getHiddenBrandNames, getProductBrand } = require("../utils/brandVisibility");
 
 // Helper to find cart
 const getCartObj = async (req) => {
@@ -27,6 +28,18 @@ exports.getCart = async (req, res) => {
     let cart = await Cart.findOne(query).populate("items.product");
 
     if (!cart) return res.json({ items: [] });
+
+    // Drop items whose brand has been hidden so they cannot reach checkout
+    const hiddenBrands = await getHiddenBrandNames();
+    if (hiddenBrands.length > 0) {
+      const visibleItems = cart.items.filter(
+        (i) => !i.product || !hiddenBrands.includes(getProductBrand(i.product))
+      );
+      if (visibleItems.length !== cart.items.length) {
+        cart.items = visibleItems;
+        await cart.save();
+      }
+    }
     res.json(cart);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -60,7 +73,8 @@ exports.addToCart = async (req, res) => {
 
     // Check availability
     const product = await Product.findById(productId);
-    if (!product) return res.status(404).json({ error: "Product not found" });
+    if (!product || await isProductHidden(product, req))
+      return res.status(404).json({ error: "Product not found" });
 
     // Logic to check if item exists (simple check on productId + variant SKU if exists)
     const itemIndex = cart.items.findIndex((p) => {

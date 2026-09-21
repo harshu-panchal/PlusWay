@@ -5,6 +5,7 @@ import { ArrowLeft, Save, AlertTriangle, ChevronDown, ChevronUp, Search, Refresh
 import Card from '../../../../shared/components/ui/Card';
 import Input from '../../../../shared/components/ui/Input';
 import Button from '../../../../shared/components/ui/Button';
+import { adminAuthHeaders } from '../../utils/authHeaders';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -24,7 +25,7 @@ const StockList = () => {
         setLoading(true);
         try {
             // Fetch all products - assume pagination might be needed later but fine for now
-            const response = await fetch(`${API_URL}/products?limit=1000`);
+            const response = await fetch(`${API_URL}/products?limit=1000`, { headers: adminAuthHeaders() });
             const data = await response.json();
             if (response.ok) {
                 setProducts(data.products || []);

@@ -2,6 +2,12 @@ const Customer = require('../models/Customer');
 const Admin = require('../models/Admin');
 const DeliveryBoy = require('../models/DeliveryBoy');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+const Address = require('../models/Address');
+const Cart = require('../models/Cart');
+const Wishlist = require('../models/Wishlist');
+const Review = require('../models/Review');
+const Order = require('../models/Order');
 
 // @desc    Register customer
 // @route   POST /api/auth/register
@@ -101,6 +107,63 @@ exports.getMe = async (req, res) => {
         });
     } catch (err) {
         res.status(400).json({ success: false, message: err.message });
+    }
+};
+
+// @desc    Delete own customer account and personal data
+// @route   DELETE /api/auth/me
+// @access  Private (customer)
+exports.deleteAccount = async (req, res) => {
+    try {
+        if (req.user.role !== 'customer') {
+            return res.status(403).json({ success: false, message: 'Only customer accounts can be deleted here' });
+        }
+
+        const { password } = req.body || {};
+        if (!password) {
+            return res.status(400).json({ success: false, message: 'Please confirm your password to delete your account' });
+        }
+
+        const customer = await Customer.findById(req.user._id).select('+password');
+        if (!customer || !(await customer.matchPassword(password))) {
+            return res.status(401).json({ success: false, message: 'Incorrect password' });
+        }
+
+        const userId = customer._id;
+
+        // Reviews: remove and refresh the rating of every product they reviewed
+        const reviews = await Review.find({ user: userId }).select('product');
+        await Review.deleteMany({ user: userId });
+        const reviewedProducts = [...new Set(reviews.map((r) => r.product.toString()))];
+        await Promise.all(reviewedProducts.map((id) => Review.getAverageRating(new mongoose.Types.ObjectId(id))));
+
+        await Promise.all([
+            Address.deleteMany({ user: userId }),
+            Cart.deleteMany({ user: userId }),
+            Wishlist.deleteMany({ user: userId })
+        ]);
+
+        // Orders are kept for accounting / tax records but are no longer linked to the person.
+        // Personal details are wiped on finished orders; orders still being fulfilled keep the
+        // shipping address until they are delivered or cancelled.
+        await Order.updateMany(
+            { user: userId, status: { $in: ['Delivered', 'Cancelled'] } },
+            {
+                $set: {
+                    'shippingAddress.fullName': 'Deleted User',
+                    'shippingAddress.phone': 'Deleted',
+                    'shippingAddress.addressLine': 'Deleted'
+                }
+            }
+        );
+        await Order.updateMany({ user: userId }, { $unset: { user: '' } });
+
+        await customer.deleteOne();
+
+        res.cookie('token', 'none', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
+        res.status(200).json({ success: true, data: {} });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 };
 

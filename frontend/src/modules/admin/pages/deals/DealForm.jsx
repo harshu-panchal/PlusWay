@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Search, Check, Plus } from 'lucide-react';
+import { adminAuthHeaders } from '../../utils/authHeaders';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -26,7 +27,7 @@ const DealForm = () => {
         const fetchProducts = async () => {
             if (!searchQuery) return;
             try {
-                const res = await fetch(`${API_BASE_URL}/products?search=${searchQuery}&limit=5`);
+                const res = await fetch(`${API_BASE_URL}/products?search=${searchQuery}&limit=5`, { headers: adminAuthHeaders() });
                 const data = await res.json();
                 setProducts(data.products || []);
             } catch (err) {

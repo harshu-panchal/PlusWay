@@ -1,11 +1,12 @@
 const Deal = require('../models/Deal');
+const { isProductHidden } = require('../utils/brandVisibility');
 
 // Get the current active deal
 exports.getActiveDeal = async (req, res) => {
     try {
         // Find the most recently updated active deal
         const deal = await Deal.findOne({ isActive: true }).sort({ updatedAt: -1 }).populate('product');
-        if (!deal) {
+        if (!deal || (deal.product && await isProductHidden(deal.product, req))) {
             return res.status(404).json({ message: 'No active deal found' });
         }
         res.status(200).json(deal);

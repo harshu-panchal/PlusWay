@@ -4,6 +4,7 @@ import Card from '../../../../shared/components/ui/Card';
 import Input from '../../../../shared/components/ui/Input';
 import Button from '../../../../shared/components/ui/Button';
 import { Plus, Trash, Save, ArrowLeft, Layers, X } from 'lucide-react';
+import { adminAuthHeaders } from '../../utils/authHeaders';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -57,7 +58,7 @@ const ProductForm = () => {
             const fetchProduct = async () => {
                 setLoading(true);
                 try {
-                    const res = await fetch(`${API_URL}/products/${id}`);
+                    const res = await fetch(`${API_URL}/products/${id}`, { headers: adminAuthHeaders() });
                     const data = await res.json();
                     if (res.ok) {
                         setFormData({

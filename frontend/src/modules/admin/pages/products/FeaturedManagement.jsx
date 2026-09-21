@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Card from '../../../../shared/components/ui/Card';
 import Badge from '../../../../shared/components/ui/Badge';
 import { Package, Search, Star, Zap } from 'lucide-react';
+import { adminAuthHeaders } from '../../utils/authHeaders';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -31,7 +32,7 @@ const FeaturedManagement = () => {
                 if (value) queryParams.append(key, value);
             });
 
-            const response = await fetch(`${API_URL}/products?${queryParams.toString()}&limit=20`);
+            const response = await fetch(`${API_URL}/products?${queryParams.toString()}&limit=20`, { headers: adminAuthHeaders() });
             if (response.ok) {
                 const data = await response.json();
                 setProducts(data.products || []);

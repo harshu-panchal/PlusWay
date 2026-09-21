@@ -1,16 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { logout, reset } from '../../../store/authSlice';
+import { useNavigate, Link } from 'react-router-dom';
+import { logout, reset, deleteAccount } from '../../../store/authSlice';
 import { fetchMyOrders } from '../store/slices/orderSlice';
-import { User, Mail, LogOut, Package, MapPin, ChevronRight } from 'lucide-react';
+import { Mail, LogOut, Package, ChevronRight, Trash2, ShieldCheck, LifeBuoy, FileText } from 'lucide-react';
 import AddressList from '../components/AddressList';
+import Modal from '../../../shared/components/ui/Modal';
 
 const Profile = () => {
     const { user } = useSelector((state) => state.auth);
     const { orders, loading } = useSelector((state) => state.order);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deleteError, setDeleteError] = useState('');
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         dispatch(fetchMyOrders());
@@ -20,6 +25,27 @@ const Profile = () => {
         await dispatch(logout());
         dispatch(reset());
         navigate('/');
+    };
+
+    const closeDeleteModal = () => {
+        if (deleting) return;
+        setShowDeleteModal(false);
+        setDeletePassword('');
+        setDeleteError('');
+    };
+
+    const onDeleteAccount = async (e) => {
+        e.preventDefault();
+        setDeleting(true);
+        setDeleteError('');
+        const result = await dispatch(deleteAccount(deletePassword));
+        setDeleting(false);
+        if (deleteAccount.fulfilled.match(result)) {
+            dispatch(reset());
+            navigate('/', { replace: true });
+        } else {
+            setDeleteError(result.payload || 'Could not delete your account. Please try again.');
+        }
     };
 
     if (!user) {
@@ -59,6 +85,15 @@ const Profile = () => {
                                     <LogOut className="w-4 h-4 mr-2" />
                                     Sign Out
                                 </button>
+                                {user.role === 'customer' && (
+                                    <button
+                                        onClick={() => setShowDeleteModal(true)}
+                                        className="w-full mt-3 flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Delete Account
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -117,8 +152,67 @@ const Profile = () => {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <AddressList />
                     </div>
+
+                    {/* Help & Legal */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y divide-gray-100">
+                        {[
+                            { to: '/support', label: 'Help & Support', icon: LifeBuoy },
+                            { to: '/privacy', label: 'Privacy Policy', icon: ShieldCheck },
+                            { to: '/terms', label: 'Terms of Service', icon: FileText },
+                        ].map((item) => (
+                            <Link key={item.to} to={item.to} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
+                                <span className="flex items-center text-gray-700 font-medium">
+                                    <item.icon className="w-5 h-5 mr-3 text-indigo-500" />
+                                    {item.label}
+                                </span>
+                                <ChevronRight className="w-5 h-5 text-gray-400" />
+                            </Link>
+                        ))}
+                    </div>
                 </div>
             </div>
+
+            <Modal isOpen={showDeleteModal} onClose={closeDeleteModal} title="Delete Account">
+                <form onSubmit={onDeleteAccount} className="p-6 space-y-4">
+                    <p className="text-sm text-gray-600">
+                        This permanently deletes your account, saved addresses, cart, wishlist and reviews.
+                        Past orders are kept for accounting purposes but are no longer linked to you.
+                        <strong className="text-gray-900"> This cannot be undone.</strong>
+                    </p>
+                    <div>
+                        <label htmlFor="delete-password" className="block text-sm font-medium text-gray-700 mb-1">
+                            Enter your password to confirm
+                        </label>
+                        <input
+                            id="delete-password"
+                            type="password"
+                            required
+                            autoComplete="current-password"
+                            value={deletePassword}
+                            onChange={(e) => setDeletePassword(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+                        />
+                        {deleteError && <p className="mt-2 text-sm text-red-600">{deleteError}</p>}
+                    </div>
+                    <div className="flex gap-3 justify-end pt-2">
+                        <button
+                            type="button"
+                            onClick={closeDeleteModal}
+                            disabled={deleting}
+                            className="px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={deleting || !deletePassword}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                        >
+                            {deleting ? 'Deleting...' : 'Delete My Account'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 };

@@ -4,7 +4,8 @@ import Button from '../../../../shared/components/ui/Button';
 import Modal from '../../../../shared/components/ui/Modal';
 import Badge from '../../../../shared/components/ui/Badge';
 import BrandForm from './BrandForm';
-import { Plus, Edit, Trash, Search, ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash, Search, ImageIcon, Eye, EyeOff } from 'lucide-react';
+import { adminAuthHeaders } from '../../utils/authHeaders';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -17,7 +18,7 @@ const BrandList = () => {
 
     const fetchBrands = async () => {
         try {
-            const response = await fetch(`${API_URL}/brands`);
+            const response = await fetch(`${API_URL}/brands`, { headers: adminAuthHeaders() });
             if (response.ok) {
                 const data = await response.json();
                 setBrands(data);
@@ -57,6 +58,30 @@ const BrandList = () => {
         }
     };
 
+    const handleToggleVisibility = async (brand) => {
+        const hiding = brand.isActive;
+        const message = hiding
+            ? `Hide "${brand.name}"? All products of this brand will also be hidden from customers.`
+            : `Unhide "${brand.name}"? Its products will be visible to customers again.`;
+        if (!window.confirm(message)) return;
+        try {
+            const response = await fetch(`${API_URL}/brands/${brand._id}/visibility`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', ...adminAuthHeaders() },
+                body: JSON.stringify({ isActive: !brand.isActive })
+            });
+            if (response.ok) {
+                fetchBrands();
+            } else {
+                const data = await response.json().catch(() => ({}));
+                alert(data.error || data.message || 'Failed to update brand visibility');
+            }
+        } catch (error) {
+            console.error('Failed to update brand visibility', error);
+            alert('An unexpected error occurred');
+        }
+    };
+
     const handleSave = async (formData) => {
         try {
             const url = editingBrand
@@ -93,7 +118,7 @@ const BrandList = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800">Brands</h1>
-                    <p className="text-slate-500 text-sm">Manage brands displayed on the homepage marquee.</p>
+                    <p className="text-slate-500 text-sm">Manage brands displayed on the homepage marquee. Hiding a brand also hides all of its products from customers.</p>
                 </div>
                 <Button onClick={handleAdd} icon={Plus} size="sm">
                     Add Brand
@@ -168,11 +193,18 @@ const BrandList = () => {
                                         </td>
                                         <td className="py-4 px-6">
                                             <Badge variant={brand.isActive ? 'success' : 'warning'} size="sm">
-                                                {brand.isActive ? 'Active' : 'Inactive'}
+                                                {brand.isActive ? 'Visible' : 'Hidden'}
                                             </Badge>
                                         </td>
                                         <td className="py-4 px-6 text-right">
                                             <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => handleToggleVisibility(brand)}
+                                                    className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                                                    title={brand.isActive ? 'Hide brand and its products' : 'Unhide brand and its products'}
+                                                >
+                                                    {brand.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                                </button>
                                                 <button
                                                     onClick={() => handleEdit(brand)}
                                                     className="p-1.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"

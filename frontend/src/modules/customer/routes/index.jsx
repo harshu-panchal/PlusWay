@@ -30,6 +30,9 @@ const Contacts = lazy(() => import('../pages/Contacts'));
 const News = lazy(() => import('../pages/News'));
 const Promotion = lazy(() => import('../pages/Promotion'));
 const Receipts = lazy(() => import('../pages/Receipts'));
+const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
+const Terms = lazy(() => import('../pages/Terms'));
+const Support = lazy(() => import('../pages/Support'));
 
 const CustomerRoutes = () => {
     return (
@@ -66,6 +69,9 @@ const CustomerRoutes = () => {
                     <Route path="/news" element={<News />} />
                     <Route path="/promotion" element={<Promotion />} />
                     <Route path="/receipts" element={<Receipts />} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<Terms />} />
+                    <Route path="/support" element={<Support />} />
 
                     {/* Dynamic Category Routes - Last for lowest priority */}
                     <Route path="/:category" element={<ProductListing />} />

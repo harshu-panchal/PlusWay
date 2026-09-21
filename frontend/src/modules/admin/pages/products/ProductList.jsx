@@ -4,6 +4,7 @@ import Card from '../../../../shared/components/ui/Card';
 import Button from '../../../../shared/components/ui/Button';
 import Badge from '../../../../shared/components/ui/Badge';
 import { Plus, Edit, Trash, Package, Search, Filter, MoreVertical, ExternalLink } from 'lucide-react';
+import { adminAuthHeaders } from '../../utils/authHeaders';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -53,7 +54,7 @@ const ProductList = () => {
                 if (value) queryParams.append(key, value);
             });
 
-            const response = await fetch(`${API_URL}/products?${queryParams.toString()}`);
+            const response = await fetch(`${API_URL}/products?${queryParams.toString()}`, { headers: adminAuthHeaders() });
             if (response.ok) {
                 const data = await response.json();
                 setProducts(data.products || []);

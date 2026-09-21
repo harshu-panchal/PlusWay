@@ -190,6 +190,12 @@ const CustomerSignup = () => {
                         </button>
                     </form>
 
+                    <p className="mt-6 text-center text-xs text-slate-400">
+                        By creating an account you agree to our{' '}
+                        <Link to="/terms" className="underline hover:text-slate-600">Terms</Link> and{' '}
+                        <Link to="/privacy" className="underline hover:text-slate-600">Privacy Policy</Link>.
+                    </p>
+
                     <div className="mt-10 text-center">
                         <p className="text-sm font-medium text-slate-500">
                             Already have an account?{' '}

@@ -148,7 +148,7 @@ const BrandForm = ({ brand, onSave, onCancel }) => {
                             onChange={handleChange}
                             className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500"
                         />
-                        <span className="text-sm font-medium text-gray-700">Active</span>
+                        <span className="text-sm font-medium text-gray-700">Visible (uncheck to hide this brand and all its products)</span>
                     </label>
                 </div>
             </div>

@@ -75,6 +75,20 @@ export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
     }
 });
 
+export const deleteAccount = createAsyncThunk('auth/deleteAccount', async (password, thunkAPI) => {
+    try {
+        await api.delete('/auth/me', { data: { password } });
+    } catch (error) {
+        const message =
+            (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+            error.message ||
+            error.toString();
+        return thunkAPI.rejectWithValue(message);
+    }
+});
+
 export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, thunkAPI) => {
     try {
         const response = await api.get('/auth/me');
@@ -160,6 +174,13 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.isLoading = false;
                 state.isSuccess = true;
+                localStorage.removeItem('token');
+            })
+            // Delete account
+            .addCase(deleteAccount.fulfilled, (state) => {
+                state.user = null;
+                state.isAuthenticated = false;
+                state.isLoading = false;
                 localStorage.removeItem('token');
             })
             // Check Auth

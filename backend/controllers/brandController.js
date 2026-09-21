@@ -1,9 +1,11 @@
 const Brand = require('../models/Brand');
+const { isAdminRequest } = require('../utils/brandVisibility');
 
-// Get all brands
+// Get all brands (hidden brands are only returned to admins)
 exports.getBrands = async (req, res) => {
     try {
-        const brands = await Brand.find().sort({ order: 1, createdAt: -1 });
+        const filter = isAdminRequest(req) ? {} : { isActive: true };
+        const brands = await Brand.find(filter).sort({ order: 1, createdAt: -1 });
         res.json(brands);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -60,6 +62,24 @@ exports.updateBrand = async (req, res) => {
         res.json(brand);
     } catch (err) {
         res.status(400).json({ error: err.message });
+    }
+};
+
+// Hide / unhide brand. Products of a hidden brand are excluded from the storefront
+// (see utils/brandVisibility.js); nothing is changed on the products themselves,
+// so unhiding restores them exactly as they were.
+exports.setBrandVisibility = async (req, res) => {
+    try {
+        const { isActive } = req.body;
+        if (typeof isActive !== 'boolean') {
+            return res.status(400).json({ error: 'isActive (boolean) is required' });
+        }
+
+        const brand = await Brand.findByIdAndUpdate(req.params.id, { isActive }, { new: true });
+        if (!brand) return res.status(404).json({ error: 'Brand not found' });
+        res.json(brand);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 };
 

@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, registerDelivery, login, logout, getMe } = require('../controllers/authController');
+const { register, registerDelivery, login, logout, getMe, deleteAccount } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 const Joi = require('joi');
@@ -24,5 +24,6 @@ router.post('/register-delivery', registerDelivery); // Assuming delivery has di
 router.post('/login', validate(loginSchema), login);
 router.get('/logout', logout);
 router.get('/me', protect, getMe);
+router.delete('/me', protect, deleteAccount);
 
 module.exports = router;

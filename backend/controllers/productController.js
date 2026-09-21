@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const { applyBrandVisibility, isProductHidden } = require('../utils/brandVisibility');
 
 exports.createProduct = async (req, res) => {
     try {
@@ -102,6 +103,9 @@ exports.getProducts = async (req, res) => {
             if (maxPrice) query.basePrice.$lte = Number(maxPrice);
         }
 
+        // 6. Hide products of hidden brands from the storefront (admins still see them)
+        await applyBrandVisibility(query, req);
+
         // Sorting
         let sortOption = {};
         if (sort === 'price_asc') sortOption.basePrice = 1;
@@ -139,7 +143,7 @@ exports.getProductById = async (req, res) => {
             .populate('rootCategory')
             .lean();
 
-        if (!product) return res.status(404).json({ error: 'Product not found' });
+        if (!product || await isProductHidden(product, req)) return res.status(404).json({ error: 'Product not found' });
         res.json(product);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -153,7 +157,7 @@ exports.getProductBySlug = async (req, res) => {
             .populate('rootCategory')
             .lean();
 
-        if (!product) return res.status(404).json({ error: 'Product not found' });
+        if (!product || await isProductHidden(product, req)) return res.status(404).json({ error: 'Product not found' });
         res.json(product);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -206,16 +210,18 @@ exports.updateStock = async (req, res) => {
 exports.getRecommendations = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
-        if (!product) return res.status(404).json({ error: 'Product not found' });
+        if (!product || await isProductHidden(product, req)) return res.status(404).json({ error: 'Product not found' });
 
         let recommendations = [];
         const excludeIds = [product._id];
+        const hiddenBrandFilter = await applyBrandVisibility({}, req);
 
         // 1. Level 1: Same strict Category
         const sameCategory = await Product.find({
             category: product.category,
             _id: { $nin: excludeIds },
-            status: 'active'
+            status: 'active',
+            ...hiddenBrandFilter
         })
             .limit(8)
             .populate('category');
@@ -229,7 +235,8 @@ exports.getRecommendations = async (req, res) => {
             const sameRoot = await Product.find({
                 rootCategory: product.rootCategory,
                 _id: { $nin: excludeIds },
-                status: 'active'
+                status: 'active',
+                ...hiddenBrandFilter
             })
                 .limit(limit * 2) // Fetch a bit more to be safe
                 .populate('category');
@@ -243,7 +250,8 @@ exports.getRecommendations = async (req, res) => {
             const limit = 4 - recommendations.length;
             const fallback = await Product.find({
                 _id: { $nin: excludeIds },
-                status: 'active'
+                status: 'active',
+                ...hiddenBrandFilter
             })
                 .sort({ isBestSeller: -1, createdAt: -1 }) // Prioritize best sellers
                 .limit(limit)
