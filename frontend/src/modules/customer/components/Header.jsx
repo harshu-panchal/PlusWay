@@ -108,7 +108,8 @@ const Header = () => {
     };
 
     return (
-        <header className="sticky top-0 z-50 transition-all duration-300">
+        // Mobile: -top-16 equals the height of the logo/actions row (4rem grid row), so that row scrolls out of view and the search row stays pinned
+        <header className="sticky -top-16 lg:top-0 z-50 transition-all duration-300">
             <div className="glass shadow-soft">
                 <CartDrawer />
 
@@ -146,7 +147,7 @@ const Header = () => {
 
                 {/* Main Header */}
                 <div className="container mx-auto px-4 lg:px-[10%]">
-                    <div className="flex items-center justify-between py-3 lg:py-4 gap-4 lg:gap-8">
+                    <div className="grid grid-cols-[1fr_auto] grid-rows-[4rem_auto] items-center pb-3 lg:pb-0 lg:flex lg:py-4 lg:gap-8">
                         {/* Logo */}
                         <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
                             <div className="relative flex items-center justify-center w-10 h-10 lg:w-11 lg:h-11 bg-gradient-to-br from-teal-500 to-blue-600 rounded-[14px] shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform duration-300">
@@ -224,7 +225,7 @@ const Header = () => {
                         </div>
 
                         {/* Search - Responsive */}
-                        <div className="flex-1 max-w-xl mx-2 lg:mx-4">
+                        <div className="col-span-2 row-start-2 pt-[5px] lg:pt-0 w-full lg:w-auto lg:flex-1 lg:max-w-xl lg:mx-4">
                             <form onSubmit={handleSearch} className="relative group">
                                 <input
                                     type="text"
@@ -233,14 +234,14 @@ const Header = () => {
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="w-full pl-5 pr-12 py-2.5 lg:py-3 bg-slate-100 border-2 border-transparent focus:bg-white focus:border-teal-500 rounded-full outline-none transition-all text-sm font-medium"
                                 />
-                                <button type="submit" className="absolute right-2 top-1.5 lg:top-2 w-8 h-8 lg:w-9 lg:h-9 bg-teal-500 hover:bg-teal-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm">
+                                <button type="submit" aria-label="Search" className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 lg:w-9 lg:h-9 bg-teal-500 hover:bg-teal-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm">
                                     <Search className="w-4 h-4" />
                                 </button>
                             </form>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-1 lg:gap-4">
+                        <div className="col-start-2 row-start-1 flex items-center gap-1 lg:gap-4">
                             <Link to="/wishlist" className="p-2.5 text-slate-600 hover:text-red-500 transition-colors relative">
                                 <Heart className="w-5 h-5 lg:w-6 lg:h-6" />
                             </Link>
