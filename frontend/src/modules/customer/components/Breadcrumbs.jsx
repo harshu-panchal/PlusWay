@@ -3,7 +3,7 @@ import { ChevronRight, Home } from 'lucide-react';
 
 const Breadcrumbs = ({ items }) => {
     return (
-        <nav className="flex items-center text-sm text-gray-500 mb-6 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide">
+        <nav className="flex items-center text-sm text-gray-500 mb-2 sm:mb-6 overflow-x-auto whitespace-nowrap pb-1 sm:pb-2 scrollbar-hide">
             <Link to="/" className="flex items-center hover:text-teal-600 transition-colors">
                 <Home className="w-4 h-4" />
             </Link>

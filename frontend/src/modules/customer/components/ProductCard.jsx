@@ -31,7 +31,7 @@ const ProductCard = ({ product }) => {
     };
 
     return (
-        <Link to={`/product/${slug}`} className="group relative bg-white rounded-[24px] p-3 transition-all duration-300 hover:shadow-premium border border-slate-100/50">
+        <Link to={`/product/${slug}`} className="group relative flex flex-col bg-white rounded-[24px] p-3 transition-all duration-300 hover:shadow-premium border border-slate-100/50">
             {/* Badges */}
             <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
                 {isNewArrival && <span className="bg-teal-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-sm tracking-wider uppercase">New</span>}
@@ -56,7 +56,7 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* Content */}
-            <div className="px-1">
+            <div className="px-1 flex flex-col flex-1">
                 <div className="flex items-center gap-1.5 mb-2">
                     <div className="flex text-amber-400">
                         <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
@@ -72,18 +72,16 @@ const ProductCard = ({ product }) => {
                     {category?.name || 'Accessories'}
                 </p>
 
-                <div className="flex items-center justify-between mt-auto pt-1">
-                    <div className="flex flex-col">
-                        <span className="text-lg font-black text-slate-900">₹{basePrice}</span>
-                    </div>
+                <div className="flex flex-col gap-2 mt-auto pt-1">
+                    <span className="text-lg font-black text-slate-900 leading-none">₹{basePrice}</span>
 
-                    <div className="flex items-center gap-2 bg-slate-100 rounded-full px-1 py-1">
-                        <div className="flex items-center">
-                            <button onClick={handleDecrement} className="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-900 disabled:opacity-30" disabled={quantity === 1}><Minus className="w-3 h-3" /></button>
-                            <span className="text-[11px] font-black text-slate-900 w-4 text-center">{quantity}</span>
-                            <button onClick={handleIncrement} className="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-900"><Plus className="w-3 h-3" /></button>
+                    <div className="flex items-center justify-between gap-2 bg-slate-100 rounded-full p-1">
+                        <div className="flex items-center min-w-0">
+                            <button onClick={handleDecrement} className="w-7 h-7 flex items-center justify-center text-slate-500 hover:text-slate-900 disabled:opacity-30" disabled={quantity === 1}><Minus className="w-3 h-3" /></button>
+                            <span className="text-[11px] font-black text-slate-900 w-5 text-center">{quantity}</span>
+                            <button onClick={handleIncrement} className="w-7 h-7 flex items-center justify-center text-slate-500 hover:text-slate-900"><Plus className="w-3 h-3" /></button>
                         </div>
-                        <button onClick={handleAddToCart} className="bg-teal-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg shadow-teal-500/20 hover:bg-teal-600 transition-colors">
+                        <button onClick={handleAddToCart} className="shrink-0 bg-teal-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg shadow-teal-500/20 hover:bg-teal-600 transition-colors" aria-label="Add to cart">
                             <ShoppingCart className="w-3.5 h-3.5" strokeWidth={3} />
                         </button>
                     </div>

@@ -15,8 +15,8 @@ const Home = () => {
     const [promoBanners, setPromoBanners] = useState([]);
 
     // Data States
-    const [bestSellers, setBestSellers] = useState({ data: [], loading: true });
-    const [newArrivals, setNewArrivals] = useState({ data: [], loading: true });
+    const [bestSellers, setBestSellers] = useState({ data: [], loading: true, fallback: false });
+    const [newArrivals, setNewArrivals] = useState({ data: [], loading: true, fallback: false });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,15 +39,34 @@ const Home = () => {
                     setPromoBanners(data);
                 }
 
-                if (prodRes.ok) {
-                    const data = await prodRes.json();
-                    setBestSellers({ data: data.products || [], loading: false });
+                const featured = prodRes.ok ? (await prodRes.json()).products || [] : [];
+                const arrivals = newRes.ok ? (await newRes.json()).products || [] : [];
+
+                // Until products are flagged as Featured / New Arrival in the admin panel, fall back to the
+                // latest products so these sections are never empty. Featured takes the next page so the
+                // two sections don't show identical items.
+                const fetchLatest = async (page) => {
+                    const res = await fetch(`${API_URL}/products?limit=8&sort=newest&page=${page}`);
+                    return res.ok ? (await res.json()).products || [] : [];
+                };
+                let arrivalsFallback = [];
+                let featuredFallback = [];
+                if (arrivals.length === 0) arrivalsFallback = await fetchLatest(1);
+                if (featured.length === 0) {
+                    featuredFallback = await fetchLatest(2);
+                    if (featuredFallback.length === 0) featuredFallback = arrivalsFallback.length ? arrivalsFallback : await fetchLatest(1);
                 }
 
-                if (newRes.ok) {
-                    const data = await newRes.json();
-                    setNewArrivals({ data: data.products || [], loading: false });
-                }
+                setBestSellers({
+                    data: featured.length ? featured : featuredFallback,
+                    loading: false,
+                    fallback: featured.length === 0
+                });
+                setNewArrivals({
+                    data: arrivals.length ? arrivals : arrivalsFallback,
+                    loading: false,
+                    fallback: arrivals.length === 0
+                });
 
             } catch (error) {
                 console.error("Home page data fetch error:", error);
@@ -155,7 +174,7 @@ const Home = () => {
                 title="New Arrivals"
                 products={newArrivals.data}
                 loading={newArrivals.loading}
-                link="/products?isNewArrival=true&sort=newest"
+                link={newArrivals.fallback ? '/products?sort=newest' : '/products?isNewArrival=true&sort=newest'}
             />
 
             {/* 5. Deal of the Day (Promotional Block) */}
@@ -172,7 +191,7 @@ const Home = () => {
                             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">Featured Products</h2>
                             <div className="h-1 w-16 sm:w-20 bg-teal-500 rounded-full"></div>
                         </div>
-                        <Link to="/products?isFeatured=true" className="hidden md:flex items-center text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors group">
+                        <Link to={bestSellers.fallback ? '/products' : '/products?isFeatured=true'} className="hidden md:flex items-center text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors group">
                             See All Products
                             <span className="group-hover:translate-x-1 transition-transform ml-1">→</span>
                         </Link>
@@ -194,7 +213,7 @@ const Home = () => {
                         )}
                     </div>
 
-                    <Link to="/products?isFeatured=true" className="md:hidden w-full mt-8 flex items-center justify-center bg-white border border-gray-200 text-slate-700 py-3 rounded-xl font-medium">
+                    <Link to={bestSellers.fallback ? '/products' : '/products?isFeatured=true'} className="md:hidden w-full mt-8 flex items-center justify-center bg-white border border-gray-200 text-slate-700 py-3 rounded-xl font-medium">
                         View More
                     </Link>
                 </div>

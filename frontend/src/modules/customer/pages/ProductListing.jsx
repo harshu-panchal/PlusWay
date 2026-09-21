@@ -181,12 +181,12 @@ const ProductListing = () => {
 
 
     return (
-        <div className="mx-4 lg:mx-[10%] py-8">
+        <div className="mx-4 lg:mx-[10%] py-3 sm:py-8">
             <Breadcrumbs items={breadcrumbItems} />
 
             {/* Header section with sort and mobile filter toggle */}
-            <div className="mx-4 lg:mx-0 py-6 sm:py-8">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{pageTitle}</h1>
+            <div className="pb-3 sm:py-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">{pageTitle}</h1>
                 {localSearch && (
                     <p className="text-teal-600 text-sm mt-1 flex items-center gap-2">
                         Filtering in {activeCategory?.name || 'All Products'}
@@ -202,7 +202,7 @@ const ProductListing = () => {
             </div>
 
             {/* Header Controls */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 {/* Search */}
                 <div className="relative w-full sm:w-auto sm:flex-1 sm:max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
