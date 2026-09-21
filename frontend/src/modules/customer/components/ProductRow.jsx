@@ -58,7 +58,7 @@ const ProductRow = ({ title, products, link, loading }) => {
                 {/* List - ScrollSnap */}
                 <div
                     ref={scrollRef}
-                    className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-6 sm:pb-8 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] -mx-4 px-4 lg:-mx-0 lg:px-0 touch-pan-x"
+                    className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-6 sm:pb-8 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none'] -mx-4 px-4 lg:-mx-0 lg:px-0"
                 >
                     {loading ? (
                         [1, 2, 3, 4, 5].map(i => (

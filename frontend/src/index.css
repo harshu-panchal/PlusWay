@@ -13,6 +13,18 @@
     @apply m-0 font-sans antialiased text-slate-900 bg-slate-50;
     font-family: 'Plus Jakarta Sans', sans-serif;
     -webkit-tap-highlight-color: transparent;
+    /* Disable double-tap zoom; taps and scrolling still work normally */
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* iOS zooms into any focused field whose font-size is below 16px */
+  @media (max-width: 1023px) {
+    input:not([type='checkbox']):not([type='radio']),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
 }
 
