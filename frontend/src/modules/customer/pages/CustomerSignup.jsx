@@ -92,9 +92,9 @@ const CustomerSignup = () => {
                             <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
                                 <Zap className="w-4 h-4 text-white fill-current" />
                             </div>
-                            <span className="font-black tracking-tighter text-slate-900">PLUSWAY</span>
+                            <span className="font-black tracking-tighter text-slate-900">MOBHUB</span>
                         </Link>
-                        <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-3">Join PlusWay</h2>
+                        <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-3">Join Mobhub</h2>
                         <p className="text-slate-500 font-medium">Get started with your first premium order today.</p>
                     </div>
 

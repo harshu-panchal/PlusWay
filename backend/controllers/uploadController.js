@@ -14,7 +14,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'plusway_products',
+        folder: 'mobhub_products',
         allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
     },
 });

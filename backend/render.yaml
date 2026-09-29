@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: plusway-backend
+    name: mobhub-backend
     runtime: node
     region: singapore
     plan: free

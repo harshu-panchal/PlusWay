@@ -1,7 +1,7 @@
 {
-    "name": "plusway-backend",
+    "name": "mobhub-backend",
     "version": "1.0.0",
-    "description": "Backend for PlusWay Multi-Vendor E-commerce",
+    "description": "Backend for Mobhub Multi-Vendor E-commerce",
     "main": "server.js",
     "scripts": {
         "start": "node server.js",

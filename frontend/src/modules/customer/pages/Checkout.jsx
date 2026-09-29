@@ -120,7 +120,7 @@ const Checkout = () => {
                     // So here we need `amount: result.payload.amount * 100` OR use `razorpayOrderId` which already has amount linked?
                     // options usually takes order_id.
                     currency: currency,
-                    name: "PlusWay",
+                    name: "Mobhub",
                     description: "Order Payment",
                     order_id: razorpayOrderId,
                     handler: async function (response) {

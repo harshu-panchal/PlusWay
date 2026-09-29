@@ -155,7 +155,7 @@ const Header = () => {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-xl lg:text-2xl font-black tracking-tighter text-slate-900 leading-none">
-                                    PLUSWAY
+                                    MOBHUB
                                 </span>
                                 <span className="text-[9px] lg:text-[10px] uppercase font-bold text-slate-400 tracking-[0.3em] leading-none mt-1">
                                     STORE

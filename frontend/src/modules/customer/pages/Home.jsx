@@ -257,7 +257,7 @@ const Home = () => {
                 <div className="mx-4 lg:mx-[10%] relative z-10">
                     <div className="max-w-3xl mx-auto text-center">
                         <span className="text-teal-500 font-bold tracking-widest uppercase text-xs mb-2 block">Stay Connected</span>
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4 tracking-tight">Join the PlusWay Family</h2>
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4 tracking-tight">Join the Mobhub Family</h2>
                         <p className="text-slate-400 mb-6 sm:mb-8 md:mb-10 text-sm sm:text-base md:text-lg leading-relaxed px-4">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals sent directly to your inbox.</p>
 
                         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-lg mx-auto px-4">

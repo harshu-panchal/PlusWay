@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Category = require('./models/Category');
 
@@ -12,7 +12,7 @@ const hierarchy = [
     },
     {
         name: 'Protective glasses',
-        icon: '📱',
+        icon: 'ðŸ“±',
         filterableAttributes: ['Brand', 'Model Compatibility', 'Material', 'Type', 'Hardness', 'Thickness', 'Edge Curvature'],
         children: [
             {
@@ -52,7 +52,7 @@ const hierarchy = [
     },
     {
         name: 'Cases and straps',
-        icon: '🛡️',
+        icon: 'ðŸ›¡ï¸',
         filterableAttributes: ['Brand', 'Model Compatibility', 'Material', 'Color', 'MagSafe', 'Design'],
         children: [
             {
@@ -83,7 +83,7 @@ const hierarchy = [
     },
     {
         name: 'Cables and adapters',
-        icon: '🔌',
+        icon: 'ðŸ”Œ',
         filterableAttributes: ['Connector Type', 'Length', 'Power (W)', 'Data Transfer Speed', 'Material', 'Color'],
         children: [
             'Type-C to Type-C', 'Type-C to Lightning', 'USB to Lightning',
@@ -93,7 +93,7 @@ const hierarchy = [
     },
     {
         name: 'Charger',
-        icon: '⚡',
+        icon: 'âš¡',
         filterableAttributes: ['Power (W)', 'Ports', 'Technology (GaN)', 'Type', 'Color'],
         children: [
             'Car chargers', 'Car chargers with cable',
@@ -103,7 +103,7 @@ const hierarchy = [
     },
     {
         name: 'Headphones',
-        icon: '🎧',
+        icon: 'ðŸŽ§',
         filterableAttributes: ['Type', 'Connectivity', 'ANC (Noise Cancellation)', 'Battery Life', 'Color', 'Brand'],
         children: [
             'Bluetooth headphones', 'Wired headphones', 'Over-the-ear headphones'
@@ -111,17 +111,17 @@ const hierarchy = [
     },
     {
         name: 'Portable speakers',
-        icon: '🔊',
+        icon: 'ðŸ”Š',
         filterableAttributes: ['Power (W)', 'Battery Life', 'Water Resistance', 'Connectivity', 'Color']
     },
     {
         name: 'Portable batteries Power Banks',
-        icon: '🔋',
+        icon: 'ðŸ”‹',
         filterableAttributes: ['Capacity (mAh)', 'Output Power (W)', 'Ports', 'Wireless Charging', 'Brand']
     },
     {
         name: 'Car accessories',
-        icon: '🚗',
+        icon: 'ðŸš—',
         children: [
             'Car chargers', 'Car chargers with cable', 'FM Transmitters',
             'Car holders', 'Additional accessories'
@@ -129,14 +129,14 @@ const hierarchy = [
     },
     {
         name: 'Holders and stands',
-        icon: '🤳',
+        icon: 'ðŸ¤³',
         children: [
             'Phone holders', 'Stands for phones, tablets, laptops'
         ]
     },
     {
         name: 'Gadgets',
-        icon: '🎮',
+        icon: 'ðŸŽ®',
         children: [
             'Smart watches', 'Portable Fans', 'Air humidifiers', 'LED lamps',
             'Selfie monopods', 'Microphones', 'Beauty and care',
@@ -145,22 +145,22 @@ const hierarchy = [
     },
     {
         name: 'Computer accessories',
-        icon: '💻',
+        icon: 'ðŸ’»',
         children: [
             'Mouse', 'Keyboard', 'Computer headphones', 'Computer Speakers'
         ]
     },
-    { name: 'Card readers', icon: '💾' },
-    { name: 'Batteries for phones', icon: '🔋' },
+    { name: 'Card readers', icon: 'ðŸ’¾' },
+    { name: 'Batteries for phones', icon: 'ðŸ”‹' },
     {
         name: 'Kids Accessories',
-        icon: '🧸',
+        icon: 'ðŸ§¸',
         children: [
             'Kids Headphones', 'Kids Smartwatches', "Kids' Microphones",
             'Photo and Video', 'Drawing tablets', 'Toys'
         ]
     },
-    { name: 'Best sellers', icon: '🔥' }
+    { name: 'Best sellers', icon: 'ðŸ”¥' }
 ];
 
 const seedCategories = async () => {
@@ -217,3 +217,4 @@ const seedCategories = async () => {
 };
 
 seedCategories();
+

@@ -64,7 +64,7 @@ const CustomerLogin = () => {
                         Elevate Your Mobile <span className="text-teal-400">Experience.</span>
                     </h1>
                     <p className="text-slate-400 text-lg font-medium leading-relaxed">
-                        Join PlusWay to discover premium mobile accessories designed for style and durability.
+                        Join Mobhub to discover premium mobile accessories designed for style and durability.
                     </p>
                 </div>
 
@@ -87,7 +87,7 @@ const CustomerLogin = () => {
                             <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
                                 <Zap className="w-4 h-4 text-white fill-current" />
                             </div>
-                            <span className="font-black tracking-tighter text-slate-900">PLUSWAY</span>
+                            <span className="font-black tracking-tighter text-slate-900">MOBHUB</span>
                         </Link>
                         <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-3">Welcome Back</h2>
                         <p className="text-slate-500 font-medium">Log in to manage your orders and wishlist.</p>
@@ -157,7 +157,7 @@ const CustomerLogin = () => {
 
                     <div className="mt-10 text-center">
                         <p className="text-sm font-medium text-slate-500">
-                            New to PlusWay?{' '}
+                            New to Mobhub?{' '}
                             <Link
                                 to="/signup"
                                 className="text-teal-600 font-black hover:text-teal-700 transition-colors"

@@ -1,6 +1,6 @@
-# PlusWay Backend API
+﻿# Mobhub Backend API
 
-Backend server for PlusWay Multi-Vendor E-commerce platform built with Node.js, Express, and MongoDB.
+Backend server for Mobhub Multi-Vendor E-commerce platform built with Node.js, Express, and MongoDB.
 
 ## Features
 
@@ -113,14 +113,14 @@ See `.env.example` for required environment variables:
 
 ```
 backend/
-├── controllers/      # Request handlers
-├── models/          # Mongoose schemas
-├── routes/          # API routes
-├── middleware/      # Custom middleware (auth, security)
-├── .env.example     # Environment variables template
-├── server.js        # Application entry point
-├── package.json     # Dependencies
-└── DEPLOYMENT.md    # Deployment guide
+â”œâ”€â”€ controllers/      # Request handlers
+â”œâ”€â”€ models/          # Mongoose schemas
+â”œâ”€â”€ routes/          # API routes
+â”œâ”€â”€ middleware/      # Custom middleware (auth, security)
+â”œâ”€â”€ .env.example     # Environment variables template
+â”œâ”€â”€ server.js        # Application entry point
+â”œâ”€â”€ package.json     # Dependencies
+â””â”€â”€ DEPLOYMENT.md    # Deployment guide
 ```
 
 ## Security Features
@@ -208,3 +208,4 @@ MIT
 ## Support
 
 For issues and questions, please open an issue on GitHub.
+

@@ -43,7 +43,7 @@ const Sidebar = () => {
                         <Package className="text-white w-6 h-6" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold text-white tracking-tight">PlusWay</h1>
+                        <h1 className="text-xl font-bold text-white tracking-tight">Mobhub</h1>
                         <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-semibold">Admin Portal</p>
                     </div>
                 </div>

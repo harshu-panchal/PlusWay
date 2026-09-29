@@ -6,7 +6,7 @@ const Partners = () => {
         <div className="mx-4 lg:mx-[10%] py-12">
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl font-extrabold text-slate-900 mb-4">Partner with PlusWay</h1>
+                    <h1 className="text-4xl font-extrabold text-slate-900 mb-4">Partner with Mobhub</h1>
                     <p className="text-lg text-slate-600">Join our ecosystem and grow your business with premium mobile accessories.</p>
                 </div>
 
@@ -24,7 +24,7 @@ const Partners = () => {
                             <Users className="w-6 h-6" />
                         </div>
                         <h3 className="text-xl font-bold text-slate-900 mb-3">Affiliate Program</h3>
-                        <p className="text-slate-600 leading-relaxed">Earn competitive commissions by promoting PlusWay products through your content, social media, or website.</p>
+                        <p className="text-slate-600 leading-relaxed">Earn competitive commissions by promoting Mobhub products through your content, social media, or website.</p>
                     </div>
 
                     <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">

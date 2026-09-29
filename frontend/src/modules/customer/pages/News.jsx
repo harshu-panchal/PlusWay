@@ -22,7 +22,7 @@ const News = () => {
         {
             id: 3,
             category: 'Sustainability',
-            title: 'PlusWay Eco-Friendly Packaging Initiative',
+            title: 'Mobhub Eco-Friendly Packaging Initiative',
             excerpt: 'We are proud to announce that 100% of our packaging is now made from recycled materials and is fully compostable.',
             date: 'May 5, 2024',
             image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800'
@@ -34,7 +34,7 @@ const News = () => {
             <div className="max-w-6xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
                     <div>
-                        <h1 className="text-4xl font-extrabold text-slate-900 mb-4">PlusWay News</h1>
+                        <h1 className="text-4xl font-extrabold text-slate-900 mb-4">Mobhub News</h1>
                         <p className="text-lg text-slate-600 max-w-xl">Stay updated with the latest product launches, tech insights, and company updates.</p>
                     </div>
                     <div className="flex gap-2">

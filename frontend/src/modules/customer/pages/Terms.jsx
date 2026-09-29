@@ -5,7 +5,7 @@ const LAST_UPDATED = 'September 21, 2026';
 const sections = [
     {
         title: '1. Acceptance of terms',
-        body: 'By creating an account or placing an order with PLUSWAY STORE (operated by PLUSWAY RETAIL, Mumbai, India), you agree to these terms. If you do not agree, please do not use the store.',
+        body: 'By creating an account or placing an order with MOBHUB STORE (operated by MOBHUB RETAIL, Mumbai, India), you agree to these terms. If you do not agree, please do not use the store.',
     },
     {
         title: '2. Your account',
@@ -29,7 +29,7 @@ const sections = [
     },
     {
         title: '7. Limitation of liability',
-        body: 'To the extent permitted by law, PLUSWAY RETAIL is not liable for indirect or consequential losses arising from your use of the store. Our total liability for any order is limited to the amount you paid for it.',
+        body: 'To the extent permitted by law, MOBHUB RETAIL is not liable for indirect or consequential losses arising from your use of the store. Our total liability for any order is limited to the amount you paid for it.',
     },
     {
         title: '8. Governing law',
@@ -37,7 +37,7 @@ const sections = [
     },
     {
         title: '9. Contact',
-        body: 'Questions about these terms can be sent to plusway9@gmail.com.',
+        body: 'Questions about these terms can be sent to mobhub@gmail.com.',
     },
 ];
 

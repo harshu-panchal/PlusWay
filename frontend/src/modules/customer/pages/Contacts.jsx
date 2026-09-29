@@ -27,7 +27,7 @@ const Contacts = () => {
                         </div>
                         <h3 className="text-lg font-bold mb-2">Email Support</h3>
                         <p className="text-slate-500 mb-4 text-sm">24/7 Response time</p>
-                        <a href="mailto:plusway9@gmail.com" className="text-blue-600 font-bold hover:underline">plusway9@gmail.com</a>
+                        <a href="mailto:mobhub@gmail.com" className="text-blue-600 font-bold hover:underline">mobhub@gmail.com</a>
                     </div>
 
                     <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm text-center group hover:-translate-y-1 transition-all">
@@ -78,7 +78,7 @@ const Contacts = () => {
                                     <MapPin className="w-6 h-6 text-teal-500 shrink-0" />
                                     <div>
                                         <h4 className="font-bold mb-1">Main Store & Office</h4>
-                                        <p className="text-slate-400 text-sm">Shop No. 12, PlusWay Heights, Near Metro Mall, Mumbai, Maharashtra 400001, India</p>
+                                        <p className="text-slate-400 text-sm">Shop No. 12, Mobhub Heights, Near Metro Mall, Mumbai, Maharashtra 400001, India</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-4">

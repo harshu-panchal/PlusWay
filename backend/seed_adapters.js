@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
 const dotenv = require('dotenv');
 const fs = require('fs-extra');
@@ -9,7 +9,7 @@ const Category = require('./models/Category');
 dotenv.config();
 
 const IMAGES_DIR = path.resolve(__dirname, '../scraper_tool/product images/Cables and adapters/Adapters (extension cords)');
-const CLOUDINARY_FOLDER = 'plusway_products';
+const CLOUDINARY_FOLDER = 'mobhub_products';
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -116,3 +116,4 @@ const seed = async () => {
 };
 
 seed();
+

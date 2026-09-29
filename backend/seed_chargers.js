@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
 const dotenv = require('dotenv');
 const fs = require('fs-extra');
@@ -8,10 +8,10 @@ const Category = require('./models/Category');
 
 dotenv.config();
 
-// NOTE: The folder name 'Сharger' might contain a Cyrillic 'C'.
+// NOTE: The folder name 'Ð¡harger' might contain a Cyrillic 'C'.
 // We use the exact string from directory listing.
-const SOURCE_DIR = path.resolve(__dirname, '../scraper_tool/product images/Сharger');
-const CLOUDINARY_FOLDER = 'plusway_products';
+const SOURCE_DIR = path.resolve(__dirname, '../scraper_tool/product images/Ð¡harger');
+const CLOUDINARY_FOLDER = 'mobhub_products';
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -60,7 +60,7 @@ const parseFilename = (filename) => {
         .replace('car-chargers_', '')
         .replace('network-chargers_', '')
         .replace('wireless-chargers_', '')
-        .replace('сharger_', '') // Try both Cyrillic and Latin
+        .replace('Ñharger_', '') // Try both Cyrillic and Latin
         .replace('charger_', '')
         .replace(/_/g, ' ')
         .replace(/-/g, ' ');
@@ -190,3 +190,4 @@ const seed = async () => {
 };
 
 seed();
+

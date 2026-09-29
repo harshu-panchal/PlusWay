@@ -30,7 +30,7 @@ const HeroCarousel = () => {
     const displayBanners = banners.length > 0 ? banners : [
         {
             _id: 'default',
-            title: 'Welcome to PlusWay',
+            title: 'Welcome to Mobhub',
             subtitle: 'Premium Mobile Accessories',
             image: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=1200&h=400&fit=crop',
             bgColor: 'from-cyan-400 to-cyan-600',

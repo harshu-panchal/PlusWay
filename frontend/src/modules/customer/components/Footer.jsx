@@ -9,9 +9,9 @@ const Footer = () => {
                     <div className="flex flex-col space-y-6">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-teal-500 rounded-xl flex items-center justify-center">
-                                <span className="text-white font-black text-xl">P</span>
+                                <span className="text-white font-black text-xl">M</span>
                             </div>
-                            <span className="text-2xl font-black tracking-tighter text-white">PLUSWAY</span>
+                            <span className="text-2xl font-black tracking-tighter text-white">MOBHUB</span>
                         </div>
                         <p className="text-sm leading-relaxed max-w-xs">
                             Elevating your mobile experience with premium accessories designed for style and durability.
@@ -49,7 +49,7 @@ const Footer = () => {
                                 <span className="text-white font-medium">+91 98701 62128</span>
                             </li>
                             <li className="flex items-center gap-3">
-                                <span>plusway9@gmail.com</span>
+                                <span>mobhub@gmail.com</span>
                             </li>
                             <li>
                                 <p className="leading-relaxed">Mumbai, Maharashtra, India</p>
@@ -60,7 +60,7 @@ const Footer = () => {
 
                 <div className="border-t border-slate-800 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-xs tracking-wide">
-                        &copy; {new Date().getFullYear()} PLUSWAY STORE. OPERATED BY PLUSWAY RETAIL.
+                        &copy; {new Date().getFullYear()} MOBHUB STORE. OPERATED BY MOBHUB RETAIL.
                     </p>
                     <div className="flex gap-8 text-xs font-bold uppercase tracking-widest">
                         <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>

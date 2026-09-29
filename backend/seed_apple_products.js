@@ -1,4 +1,4 @@
-// Seeds 2 genuine Apple products each into Chargers, Computer accessories and Gadgets.
+﻿// Seeds 2 genuine Apple products each into Chargers, Computer accessories and Gadgets.
 //
 // Usage: node seed_apple_products.js
 //
@@ -18,7 +18,7 @@ const Category = require('./models/Category');
 dotenv.config();
 
 const IMAGE_DIR = path.resolve(__dirname, 'seed_images/apple');
-const CLOUDINARY_FOLDER = 'plusway_products';
+const CLOUDINARY_FOLDER = 'mobhub_products';
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -193,3 +193,4 @@ seed()
         console.error('Fatal error:', err);
         process.exit(1);
     });
+

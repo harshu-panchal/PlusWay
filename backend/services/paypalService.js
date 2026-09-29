@@ -53,7 +53,7 @@ const createOrder = async (cart) => {
             },
         ],
         application_context: {
-            brand_name: "PlusWay",
+            brand_name: "Mobhub",
             landing_page: "NO_PREFERENCE",
             user_action: "PAY_NOW",
             shipping_preference: "NO_SHIPPING" // Adjust if you want PayPal to handle shipping info

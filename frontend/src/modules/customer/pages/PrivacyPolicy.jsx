@@ -7,10 +7,10 @@ const sections = [
         title: '1. Who we are',
         body: (
             <p>
-                PLUSWAY STORE is operated by PLUSWAY RETAIL, Mumbai, Maharashtra, India ("PlusWay", "we", "us").
+                MOBHUB STORE is operated by MOBHUB RETAIL, Mumbai, Maharashtra, India ("Mobhub", "we", "us").
                 This policy explains what personal information we collect through our website and mobile app,
                 how we use it, and the choices you have. Questions can be sent to{' '}
-                <a href="mailto:plusway9@gmail.com" className="text-teal-600 font-semibold hover:underline">plusway9@gmail.com</a>.
+                <a href="mailto:mobhub@gmail.com" className="text-teal-600 font-semibold hover:underline">mobhub@gmail.com</a>.
             </p>
         ),
     },
@@ -104,9 +104,9 @@ const sections = [
         title: '10. Contact us',
         body: (
             <>
-                <p className="mb-3">For privacy questions, data requests or help deleting your account, contact PLUSWAY RETAIL:</p>
+                <p className="mb-3">For privacy questions, data requests or help deleting your account, contact MOBHUB RETAIL:</p>
                 <ul className="space-y-1">
-                    <li>Email: <a href="mailto:plusway9@gmail.com" className="text-teal-600 font-semibold hover:underline">plusway9@gmail.com</a></li>
+                    <li>Email: <a href="mailto:mobhub@gmail.com" className="text-teal-600 font-semibold hover:underline">mobhub@gmail.com</a></li>
                     <li>Phone: <a href="tel:+919870162128" className="text-teal-600 font-semibold hover:underline">+91 98701 62128</a> (Mon-Sat, 10AM - 7PM)</li>
                     <li>Address: Mumbai, Maharashtra, India</li>
                 </ul>

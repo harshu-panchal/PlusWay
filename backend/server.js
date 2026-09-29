@@ -70,7 +70,7 @@ app.get('/health', (req, res) => {
 
 // Root Route
 app.get('/', (req, res) => {
-    res.send('PlusWay Backend API is Running');
+    res.send('Mobhub Backend API is Running');
 });
 
 // Import Routes

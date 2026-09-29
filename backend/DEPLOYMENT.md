@@ -1,6 +1,6 @@
-# Backend Deployment Guide for Render
+﻿# Backend Deployment Guide for Render
 
-This guide provides step-by-step instructions to deploy the PlusWay e-commerce backend to Render.
+This guide provides step-by-step instructions to deploy the Mobhub e-commerce backend to Render.
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@ git push origin main
 ### 2. Create a New Web Service on Render
 
 1. Log in to [Render Dashboard](https://dashboard.render.com)
-2. Click **"New +"** → **"Web Service"**
+2. Click **"New +"** â†’ **"Web Service"**
 3. Connect your GitHub repository
 4. Select the repository containing your backend code
 
@@ -36,7 +36,7 @@ git push origin main
 
 Fill in the following details:
 
-- **Name**: `plusway-backend` (or your preferred name)
+- **Name**: `Mobhub-backend` (or your preferred name)
 - **Region**: Choose closest to your users (e.g., Singapore, Oregon)
 - **Branch**: `main` (or your default branch)
 - **Root Directory**: `backend` (if backend is in a subdirectory)
@@ -47,7 +47,7 @@ Fill in the following details:
 
 ### 4. Configure Environment Variables
 
-Click **"Advanced"** → **"Add Environment Variable"** and add the following:
+Click **"Advanced"** â†’ **"Add Environment Variable"** and add the following:
 
 | Variable Name | Value | Notes |
 |---------------|-------|-------|
@@ -76,13 +76,13 @@ Click **"Advanced"** → **"Add Environment Variable"** and add the following:
 
 ### 6. Verify Deployment
 
-Once deployed, Render will provide a URL like: `https://plusway-backend.onrender.com`
+Once deployed, Render will provide a URL like: `https://Mobhub-backend.onrender.com`
 
 Test the following endpoints:
 
 1. **Health Check**:
    ```bash
-   curl https://plusway-backend.onrender.com/health
+   curl https://Mobhub-backend.onrender.com/health
    ```
    Expected response:
    ```json
@@ -96,13 +96,13 @@ Test the following endpoints:
 
 2. **Root Endpoint**:
    ```bash
-   curl https://plusway-backend.onrender.com/
+   curl https://Mobhub-backend.onrender.com/
    ```
-   Expected: `PlusWay Backend API is Running`
+   Expected: `Mobhub Backend API is Running`
 
 3. **Test API Endpoint** (e.g., categories):
    ```bash
-   curl https://plusway-backend.onrender.com/api/categories
+   curl https://Mobhub-backend.onrender.com/api/categories
    ```
 
 ## Post-Deployment Configuration
@@ -113,7 +113,7 @@ Update your frontend's API URL to point to the Render backend:
 
 **For Vercel/Vite**:
 ```env
-VITE_API_URL=https://plusway-backend.onrender.com
+VITE_API_URL=https://Mobhub-backend.onrender.com
 ```
 
 ### Enable CORS
@@ -181,10 +181,10 @@ By default, Render automatically deploys when you push to the connected branch. 
 
 ```bash
 # Check if service is running
-curl -I https://plusway-backend.onrender.com/health
+curl -I https://Mobhub-backend.onrender.com/health
 
 # View detailed health info
-curl https://plusway-backend.onrender.com/health | json_pp
+curl https://Mobhub-backend.onrender.com/health | json_pp
 ```
 
 ## Security Considerations
@@ -219,13 +219,13 @@ For production use:
 
 ```bash
 # Test health endpoint
-curl https://plusway-backend.onrender.com/health
+curl https://Mobhub-backend.onrender.com/health
 
 # Test with authentication
-curl -H "Authorization: Bearer YOUR_TOKEN" https://plusway-backend.onrender.com/api/products
+curl -H "Authorization: Bearer YOUR_TOKEN" https://Mobhub-backend.onrender.com/api/products
 
 # Check response headers
-curl -I https://plusway-backend.onrender.com/
+curl -I https://Mobhub-backend.onrender.com/
 ```
 
 ## Support
@@ -248,3 +248,4 @@ curl -I https://plusway-backend.onrender.com/
 - [ ] Frontend `VITE_API_URL` updated
 - [ ] CORS configured correctly
 - [ ] Logs monitored for errors
+
