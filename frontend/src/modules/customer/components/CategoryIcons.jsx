@@ -12,7 +12,7 @@ const CategoryIcons = () => {
         const fetchCategories = async () => {
             try {
                 // Fetch root categories or featured ones
-                const response = await fetch(`${API_URL}/categories`);
+                const response = await fetch(`${API_URL}/categories`, { credentials: 'omit' });
                 if (response.ok) {
                     const data = await response.json();
                     // Filter for root categories (level 0) and take first 8 or featured

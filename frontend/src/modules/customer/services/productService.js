@@ -16,25 +16,25 @@ export const productService = {
             });
         }
 
-        const response = await fetch(`${API_URL}/products?${queryParams.toString()}`);
+        const response = await fetch(`${API_URL}/products?${queryParams.toString()}`, { credentials: 'omit' });
         if (!response.ok) throw new Error('Failed to fetch products');
         return await response.json();
     },
 
     getProductBySlug: async (slug) => {
-        const response = await fetch(`${API_URL}/products/slug/${slug}`);
+        const response = await fetch(`${API_URL}/products/slug/${slug}`, { credentials: 'omit' });
         if (!response.ok) throw new Error('Failed to fetch product');
         return await response.json();
     },
 
     getProductById: async (id) => {
-        const response = await fetch(`${API_URL}/products/${id}`);
+        const response = await fetch(`${API_URL}/products/${id}`, { credentials: 'omit' });
         if (!response.ok) throw new Error('Failed to fetch product');
         return await response.json();
     },
 
     getCategories: async () => {
-        const response = await fetch(`${API_URL}/categories`);
+        const response = await fetch(`${API_URL}/categories`, { credentials: 'omit' });
         if (!response.ok) throw new Error('Failed to fetch categories');
         return await response.json();
     }

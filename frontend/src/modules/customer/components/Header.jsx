@@ -34,7 +34,7 @@ const Header = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch(`${API_URL}/categories`);
+                const response = await fetch(`${API_URL}/categories`, { credentials: 'omit' });
                 if (response.ok) {
                     const data = await response.json();
                     setCategories(data);

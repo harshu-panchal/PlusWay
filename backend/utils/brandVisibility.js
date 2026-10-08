@@ -3,7 +3,16 @@ const Category = require('../models/Category');
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const isAdminRequest = (req) => !!(req.user && req.user.role === 'admin');
+// Only treat as admin when an explicit Authorization header was sent.
+// Cookie-based sessions must NOT bypass storefront filters — the admin cookie
+// is automatically forwarded by browsers on same-domain deployments, which
+// would otherwise make every customer request look like an admin request.
+const isAdminRequest = (req) =>
+    !!(req.user &&
+        req.user.role === 'admin' &&
+        req.headers &&
+        req.headers.authorization &&
+        req.headers.authorization.startsWith('Bearer '));
 
 // Names (lower-cased) of every brand that is currently hidden (isActive = false)
 const getHiddenBrandNames = async () => {

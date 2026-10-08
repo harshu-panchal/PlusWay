@@ -1,5 +1,5 @@
 const Product = require('../models/Product');
-const { applyBrandVisibility, isProductHidden } = require('../utils/brandVisibility');
+const { applyBrandVisibility, isProductHidden, isAdminRequest } = require('../utils/brandVisibility');
 
 exports.createProduct = async (req, res) => {
     try {
@@ -40,6 +40,9 @@ exports.getProducts = async (req, res) => {
         // 2. Status Filter
         if (status && status !== 'All') {
             query.status = status;
+        } else if (!isAdminRequest(req)) {
+            // Storefront requests always default to active products only
+            query.status = 'active';
         }
 
         if (isFeatured === 'true') query.isFeatured = true;

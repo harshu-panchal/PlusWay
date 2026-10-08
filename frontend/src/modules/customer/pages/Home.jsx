@@ -22,11 +22,12 @@ const Home = () => {
         const fetchData = async () => {
             try {
                 // Fetch all data in parallel
+                const opts = { credentials: 'omit' };
                 const [sideRes, gridRes, prodRes, newRes] = await Promise.all([
-                    fetch(`${API_URL}/banners?position=side`),
-                    fetch(`${API_URL}/banners?position=bottom-grid`),
-                    fetch(`${API_URL}/products?limit=8&isFeatured=true`),
-                    fetch(`${API_URL}/products?limit=8&isNewArrival=true&sort=newest`)
+                    fetch(`${API_URL}/banners?position=side`, opts),
+                    fetch(`${API_URL}/banners?position=bottom-grid`, opts),
+                    fetch(`${API_URL}/products?limit=8&isFeatured=true`, opts),
+                    fetch(`${API_URL}/products?limit=8&isNewArrival=true&sort=newest`, opts)
                 ]);
 
                 if (sideRes.ok) {
@@ -46,7 +47,7 @@ const Home = () => {
                 // latest products so these sections are never empty. Featured takes the next page so the
                 // two sections don't show identical items.
                 const fetchLatest = async (page) => {
-                    const res = await fetch(`${API_URL}/products?limit=8&sort=newest&page=${page}`);
+                    const res = await fetch(`${API_URL}/products?limit=8&sort=newest&page=${page}`, { credentials: 'omit' });
                     return res.ok ? (await res.json()).products || [] : [];
                 };
                 let arrivalsFallback = [];
