@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Brand = require('../models/Brand');
 const Category = require('../models/Category');
 
@@ -51,17 +52,37 @@ const getHiddenBrandCondition = async () => {
     };
 };
 
-// Adds "exclude products of hidden brands" to a product query for non-admin callers
+// Adds brand + category visibility filters to a product query for non-admin callers.
 const applyBrandVisibility = async (query, req) => {
     if (isAdminRequest(req)) return query;
+
+    // 1. Brand filter — regex conditions work fine inside $nor
     const condition = await getHiddenBrandCondition();
     if (condition) {
         query.$nor = [...(query.$nor || []), condition];
     }
-    const hiddenCategories = [...await getHiddenCategoryIds()];
-    if (hiddenCategories.length > 0) {
-        query.$nor = [...(query.$nor || []), { category: { $in: hiddenCategories } }, { rootCategory: { $in: hiddenCategories } }];
+
+    // 2. Category filter — use $and + $nin with explicit ObjectId objects.
+    //    $nor with string IDs is unreliable when query already contains $or
+    //    (e.g. category-page queries). getHiddenCategoryIds() already propagates
+    //    inactivity down the full category tree, so filtering on the direct
+    //    `category` field alone is sufficient to hide all products in any
+    //    inactive branch.
+    const hiddenCatIds = await getHiddenCategoryIds();
+    if (hiddenCatIds.size > 0) {
+        const hiddenObjIds = [...hiddenCatIds].map(id => new mongoose.Types.ObjectId(id));
+        if (!query.$and) query.$and = [];
+        query.$and.push({ category: { $nin: hiddenObjIds } });
+        // Guard the denormalized rootCategory field too (null/missing = OK)
+        query.$and.push({
+            $or: [
+                { rootCategory: { $exists: false } },
+                { rootCategory: null },
+                { rootCategory: { $nin: hiddenObjIds } },
+            ],
+        });
     }
+
     return query;
 };
 
